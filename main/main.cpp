@@ -5,11 +5,13 @@
 #include "tag.hpp"
 #include "button.hpp"
 #include "led.hpp"
+#include "sleeper.hpp"
 
 using namespace App;
 
 static Button b1;
 static Led l1;
+static Sleeper s1;
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
