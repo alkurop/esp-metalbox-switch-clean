@@ -5,6 +5,10 @@
 #include "freertos/task.h"
 #include <esp_log.h>
 #include "tag.hpp"
+#include "esp_log.h"
+#include "esp_check.h"
+#include "esp_sleep.h"
+#include "driver/gpio.h"
 
 #define BUTTON_DEBOUNCE_MILLIS 30
 
@@ -27,9 +31,21 @@ namespace App
         std::function<void(void)> margin;
 
     public:
-        void init(gpio_num_t pin, uint8_t number, ButtonListener listener);
+        esp_err_t init(gpio_num_t pin, uint8_t number, ButtonListener listener);
         bool getState() { return state; }
         void ping();
         void toggle(bool value);
+
+        esp_err_t install();
+        esp_err_t uninstall();
+
+        static gpio_config_t createConfig(gpio_num_t pin)
+        {
+            return {1ULL << pin,
+                    GPIO_MODE_INPUT,
+                    GPIO_PULLUP_ENABLE,
+                    GPIO_PULLDOWN_DISABLE,
+                    GPIO_INTR_ANYEDGE};
+        };
     };
 }

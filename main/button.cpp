@@ -1,5 +1,5 @@
 #include "button.hpp"
-#include "esp_log.h"
+using namespace App;
 
 IRAM_ATTR void ButtonHandler::button_handler(void *arg)
 {
@@ -7,28 +7,40 @@ IRAM_ATTR void ButtonHandler::button_handler(void *arg)
     button->ping();
 };
 
-void App::Button::init(gpio_num_t pin, uint8_t number, App::ButtonListener listener)
+esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)
 {
     this->state = false;
     this->listener = listener;
     this->pin = pin;
-    gpio_config_t config{1ULL << pin,
-                         GPIO_MODE_INPUT,
-                         GPIO_PULLUP_ENABLE,
-                         GPIO_PULLDOWN_DISABLE,
-                         GPIO_INTR_ANYEDGE};
-    gpio_config(&config);
-    gpio_install_isr_service(0);
-    gpio_isr_handler_add(pin, ButtonHandler::button_handler, this);
+    auto config = createConfig(pin);
+
+    ESP_RETURN_ON_ERROR(gpio_config(&config), TAG, "config button");
+
+    ESP_LOGI(TAG, "gpio wakeup source is ready");
+    return this->install();
 };
 
-void App::Button::toggle(bool value)
+esp_err_t Button::install()
+{
+    ESP_RETURN_ON_ERROR(gpio_install_isr_service(0), TAG, "install button isr");
+
+    ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), TAG, "gpio_isr_handler_add");
+    return ESP_OK;
+};
+
+esp_err_t Button::uninstall()
+{
+    gpio_uninstall_isr_service();
+    return ESP_OK;
+};
+
+void Button::toggle(bool value)
 {
     state = !state;
     listener(number, state);
 };
 
-void App::Button::ping()
+void Button::ping()
 {
     bool value = !gpio_get_level(pin);
     bool isSameValue = this->state == value;
