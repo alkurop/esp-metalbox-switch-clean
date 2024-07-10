@@ -25,6 +25,7 @@ namespace App
             this->state = val;
             gpio_set_level(pin, static_cast<uint32_t>(val));
         }
+        bool getState() { return state; }
     };
 
 } // namespace app
