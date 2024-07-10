@@ -27,7 +27,6 @@ static void light_sleep_task(void *args)
     while (true)
     {
 
-        
         // auto config = b1.createConfig(B1_PIN);
         /* Initialize GPIO */
         // gpio_config_t config = {
@@ -41,12 +40,14 @@ static void light_sleep_task(void *args)
         // auto config = b1.createConfig(B1_PIN);
         // gpio_config(&config);
         /* Enable wake up from GPIO */
+        vTaskDelay(pdMS_TO_TICKS(5000));
 
         b1.uninstall();
-        gpio_wakeup_enable(B1_PIN, GPIO_INTR_LOW_LEVEL);
+        // gpio_wakeup_enable(B1_PIN, GPIO_INTR_LOW_LEVEL);
         printf("Button pin wakeup enabled\n");
-        esp_sleep_enable_gpio_wakeup();
-        esp_light_sleep_start();
+
+        esp_deep_sleep_enable_gpio_wakeup(BIT(B1_PIN), ESP_GPIO_WAKEUP_GPIO_LOW);
+        esp_deep_sleep_start();
 
         auto wakeup_reason = esp_sleep_get_wakeup_cause();
         printf("Woke up reason %d\n", wakeup_reason);
@@ -58,8 +59,7 @@ static void light_sleep_task(void *args)
 
         printf("Button pin wakeup disabled\n");
         b1.install();
-        
-        vTaskDelay(pdMS_TO_TICKS(3000));
+
     }
 
     vTaskDelete(NULL);
