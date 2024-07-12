@@ -23,6 +23,7 @@ auto buttonPressListener = [](uint8_t number, bool state)
 {
     esp_rom_printf("button %d changed to %d\n", number, state);
     l1.set(state);
+    s1.recordInteraction();
 };
 
 auto beforeSleep = []()

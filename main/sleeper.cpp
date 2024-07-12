@@ -1,6 +1,7 @@
 #include "sleeper.hpp"
 
-esp_err_t App::Sleeper::cycle()
+using namespace App;
+esp_err_t Sleeper::cycle()
 {
     this->beforeSleep();
     for (int i = 0; i < this->pin_count; i++)
