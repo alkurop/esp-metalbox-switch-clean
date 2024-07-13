@@ -42,7 +42,7 @@ void Sleeper::onTimeout(Timer *timer)
     else
     {
         auto timeout = timeoutSeconds - deltaSeconds;
-        ESP_LOGI(TAG, "Planning to deep sleep in %lud seconds unless user interaction happens", timeout);
+        ESP_LOGI(TAG, "Planning to deep sleep in %lu seconds unless user interaction happens", timeout);
         timer->startOneShot(timeout);
     }
 };

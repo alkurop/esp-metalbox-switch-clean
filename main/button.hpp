@@ -1,14 +1,14 @@
 #pragma once
 #include <functional>
-#include "driver/gpio.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include <driver/gpio.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <esp_log.h>
+#include <esp_check.h>
+#include <esp_sleep.h>
+#include <driver/gpio.h>
+
 #include "tag.hpp"
-#include "esp_log.h"
-#include "esp_check.h"
-#include "esp_sleep.h"
-#include "driver/gpio.h"
 
 #define BUTTON_DEBOUNCE_MILLIS 30
 

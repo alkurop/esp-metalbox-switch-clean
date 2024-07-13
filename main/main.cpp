@@ -1,13 +1,13 @@
 /*
  * Alex me
  */
-#include "esp_log.h"
+#include <esp_log.h>
+#include <esp_bit_defs.h>
+
 #include "tag.hpp"
 #include "button.hpp"
 #include "led.hpp"
 #include "sleeper.hpp"
-#include <esp_bit_defs.h>
-#include "timer.hpp"
 
 using namespace App;
 #define B1_PIN GPIO_NUM_0
