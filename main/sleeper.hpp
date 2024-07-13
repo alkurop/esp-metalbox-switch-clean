@@ -24,7 +24,6 @@ namespace App
         SleeperCallback afterWake;
         const gpio_num_t *wakeUpPins;
         uint8_t pin_count;
-
         TickType_t lastInteraction;
 
     public:

@@ -36,23 +36,6 @@ auto afterWake = []()
     b1.install();
 };
 
-static void sleep_task(void *args)
-{
-    while (false)
-    {
-
-        vTaskDelay(pdMS_TO_TICKS(5000));
-
-        auto result = s1.cycle();
-        if (result != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Deep sleep error %d", result);
-        }
-    }
-
-    vTaskDelete(NULL);
-}
-
 extern "C" void app_main(void)
 {
     esp_err_t result = b1.init(B1_PIN, 1, buttonPressListener);
@@ -62,7 +45,5 @@ extern "C" void app_main(void)
     }
     l1.init(L1_PIN);
     s1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
-
-    xTaskCreate(sleep_task, "light_sleep_task", 4096, NULL, 6, NULL);
     ESP_LOGI(TAG, ">>>>>>> connected");
 }
