@@ -14,11 +14,13 @@ using namespace App;
 #define L1_PIN GPIO_NUM_1
 
 #define PIN_SIZE 1
-const gpio_num_t wakeUpPins[PIN_SIZE] = {B1_PIN};
+#define SLEEPER_TIMEOUT_SECONDS 3
+
+gpio_num_t wakeUpPins[PIN_SIZE] = {B1_PIN};
 
 static Button b1;
 static Led l1;
-static Sleeper s1(wakeUpPins, PIN_SIZE, 5);
+static Sleeper s1(SLEEPER_TIMEOUT_SECONDS);
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
@@ -41,14 +43,16 @@ auto afterWake = []()
 
 extern "C" void app_main(void)
 {
+
     esp_err_t result = b1.init(B1_PIN, 1, buttonPressListener);
     if (result != ESP_OK)
     {
         ESP_LOGE(TAG, "Init button failed with code %d", result);
     }
     l1.init(L1_PIN);
-    s1.init(beforeSleep, afterWake);
+    s1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     s1.start();
+    // s1.pass(wakeUpPins);
 
     ESP_LOGI(TAG, ">>>>>>> connected");
 }

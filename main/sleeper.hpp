@@ -10,9 +10,10 @@
 #include "esp_sleep.h"
 #include "timer.hpp"
 
+using namespace std;
 namespace App
 {
-    using SleeperCallback = std::function<void(void)>;
+    using SleeperCallback = function<void(void)>;
 
     class Sleeper
     {
@@ -24,21 +25,25 @@ namespace App
         void onTimeout(Timer *);
 
         // params
-        const gpio_num_t *wakeUpPins;
+        gpio_num_t *wakeUpPins;
         uint8_t pinCount;
         uint8_t timeoutSeconds;
         Timer timer;
 
         // state
-        TickType_t lastInteraction;
+        int16_t lastInteractionSeconds;
 
-        void cycle();
+        void goToSleep();
 
     public:
-        Sleeper(const gpio_num_t *wakeUpPin, uint8_t pin_count, uint8_t timeoutSeconds);
-        void init(SleeperCallback beforeSleep, SleeperCallback afterWake);
+        Sleeper(uint8_t timeoutSeconds);
+        void init(
+            SleeperCallback beforeSleep,
+            SleeperCallback afterWake,
+            gpio_num_t *wakeUpPins,
+            uint8_t pinCount);
 
-        void start() ;
+        void start();
         void recordInteraction();
     };
 }

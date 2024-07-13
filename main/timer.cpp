@@ -25,7 +25,7 @@ Timer::~Timer()
 
 void Timer::startOneShot(uint8_t seconds)
 {
-    ESP_ERROR_CHECK(esp_timer_start_once(this->timerHandler, SEC_TO_NANO(seconds)));
+    ESP_ERROR_CHECK(esp_timer_start_once(this->timerHandler, SEC_TO_MICRO(seconds)));
 };
 void Timer::onTimeOut()
 {
