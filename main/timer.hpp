@@ -24,6 +24,7 @@ namespace App
         ~Timer();
        void init(TimeoutListener listener);
         void startOneShot(uint32_t seconds);
+        void startPeriodic(uint32_t seconds);
         void stop();
         void onTimeOut();
     };
