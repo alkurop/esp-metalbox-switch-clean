@@ -23,7 +23,7 @@ Timer::~Timer()
     ESP_ERROR_CHECK(esp_timer_delete(this->timerHandler));
 }
 
-void Timer::startOneShot(uint8_t seconds)
+void Timer::startOneShot(uint32_t seconds)
 {
     ESP_ERROR_CHECK(esp_timer_start_once(this->timerHandler, SEC_TO_MICRO(seconds)));
 };

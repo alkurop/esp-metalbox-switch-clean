@@ -2,7 +2,7 @@
 
 using namespace App;
 
-Sleeper::Sleeper(uint8_t timeoutSeconds)
+Sleeper::Sleeper(uint32_t timeoutSeconds)
 {
 
     this->timeoutSeconds = timeoutSeconds;
@@ -19,33 +19,30 @@ void Sleeper::init(SleeperCallback beforeSleep, SleeperCallback afterWake, gpio_
     this->pinCount = pinCount;
 };
 
-void Sleeper::recordInteraction()
-{
-    lastInteractionSeconds = MICRO_TO_SEC(esp_timer_get_time());
-};
-
+void Sleeper::recordInteraction() { lastInteractionSeconds = MICRO_TO_SEC(esp_timer_get_time()); };
 void Sleeper::start()
 {
     timer.startOneShot(timeoutSeconds);
+    ESP_LOGI(TAG, "Planning to deep sleep in %lu seconds unless user interaction happens", timeoutSeconds);
 };
+
 void Sleeper::onTimeout(Timer *timer)
 {
-
     auto now = MICRO_TO_SEC(esp_timer_get_time());
     auto deltaSeconds = now - lastInteractionSeconds;
-    ESP_LOGI(TAG, "On timeout delta seconds %d timeout seconds %d", deltaSeconds, timeoutSeconds);
+    ESP_LOGI(TAG, "On timeout delta seconds %d timeout seconds %lu", deltaSeconds, timeoutSeconds);
 
     if (deltaSeconds >= this->timeoutSeconds)
     {
         goToSleep();
         // happens after wake up
         lastInteractionSeconds = MICRO_TO_SEC(esp_timer_get_time());
-        timer->startOneShot(timeoutSeconds);
+        start();
     }
     else
     {
         auto timeout = timeoutSeconds - deltaSeconds;
-        ESP_LOGI(TAG, "Restart timer, with timeout  %d", timeout);
+        ESP_LOGI(TAG, "Planning to deep sleep in %lud seconds unless user interaction happens", timeout);
         timer->startOneShot(timeout);
     }
 };
@@ -70,9 +67,9 @@ void Sleeper::goToSleep()
     iterate(wakeUpPins, pinCount, enableWakeup);
 
     ESP_LOGI(TAG, "Deep sleep start");
-    // esp_deep_sleep_start();
-    // auto wakeup_reason = esp_sleep_get_wakeup_cause();
-    // ESP_LOGI(TAG, "Wake up with reason %d\n", wakeup_reason);
+    esp_deep_sleep_start();
+    auto wakeup_reason = esp_sleep_get_wakeup_cause();
+    ESP_LOGI(TAG, "Wake up with reason %d\n", wakeup_reason);
 
     auto disableWakeup = [](gpio_num_t item)
     {

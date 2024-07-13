@@ -14,7 +14,7 @@ using namespace App;
 #define L1_PIN GPIO_NUM_1
 
 #define PIN_SIZE 1
-#define SLEEPER_TIMEOUT_SECONDS 3
+#define SLEEPER_TIMEOUT_SECONDS 600
 
 gpio_num_t wakeUpPins[PIN_SIZE] = {B1_PIN};
 
@@ -24,22 +24,15 @@ static Sleeper s1(SLEEPER_TIMEOUT_SECONDS);
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
-    esp_rom_printf("button %d changed to %d\n", number, state);
     l1.set(state);
     s1.recordInteraction();
 };
 
 auto beforeSleep = []()
-{
-    ESP_LOGI(TAG, "beforeSleep");
-    b1.uninstall();
-};
+{ b1.uninstall(); };
 
 auto afterWake = []()
-{
-    ESP_LOGI(TAG, "afterWake");
-    b1.install();
-};
+{ b1.install(); };
 
 extern "C" void app_main(void)
 {
@@ -52,7 +45,6 @@ extern "C" void app_main(void)
     l1.init(L1_PIN);
     s1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     s1.start();
-    // s1.pass(wakeUpPins);
 
     ESP_LOGI(TAG, ">>>>>>> connected");
 }

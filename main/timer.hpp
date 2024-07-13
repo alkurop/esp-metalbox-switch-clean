@@ -22,7 +22,7 @@ namespace App
     public:
         ~Timer();
        void init(TimeoutListener listener);
-        void startOneShot(uint8_t seconds);
+        void startOneShot(uint32_t seconds);
         void stop();
         void onTimeOut();
     };

@@ -27,7 +27,7 @@ namespace App
         // params
         gpio_num_t *wakeUpPins;
         uint8_t pinCount;
-        uint8_t timeoutSeconds;
+        uint32_t timeoutSeconds;
         Timer timer;
 
         // state
@@ -36,7 +36,7 @@ namespace App
         void goToSleep();
 
     public:
-        Sleeper(uint8_t timeoutSeconds);
+        Sleeper(uint32_t timeoutSeconds);
         void init(
             SleeperCallback beforeSleep,
             SleeperCallback afterWake,
