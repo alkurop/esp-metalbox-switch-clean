@@ -8,49 +8,37 @@
 #include "freertos/task.h"
 #include "esp_check.h"
 #include "esp_sleep.h"
-
-#define TASK_PERIOD_MS 600_000
-// 10 minutes
+#include "timer.hpp"
 
 namespace App
 {
     using SleeperCallback = std::function<void(void)>;
-    using PinCallback = std::function<void(void)>;
 
     class Sleeper
     {
     private:
+        // callbacks
         SleeperCallback beforeSleep;
         SleeperCallback afterWake;
+        TimeoutListener timeoutListener;
+        void onTimeout(Timer *);
+
+        // params
         const gpio_num_t *wakeUpPins;
-        uint8_t pin_count;
+        uint8_t pinCount;
+        uint8_t timeoutSeconds;
+        Timer timer;
+
+        // state
         TickType_t lastInteraction;
 
+        void cycle();
+
     public:
-        void init(SleeperCallback beforeSleep, SleeperCallback afterWake, const gpio_num_t *wakeUpPin, uint8_t pin_count)
-        {
-            this->afterWake = afterWake;
-            this->beforeSleep = beforeSleep;
-            this->wakeUpPins = wakeUpPins;
-            this->pin_count = pin_count;
-        };
+        Sleeper(const gpio_num_t *wakeUpPin, uint8_t pin_count, uint8_t timeoutSeconds);
+        void init(SleeperCallback beforeSleep, SleeperCallback afterWake);
 
-        esp_err_t cycle();
-
-        void recordInteraction()
-        {
-            lastInteraction = xTaskGetTickCount();
-        };
-
-        bool shouldTrigger()
-        {
-            return false;
-        }
-        TickType_t nextCheck()
-        {
-            return 0;
-        }
-
-        static void sleeper_task() {};
+        void start() ;
+        void recordInteraction();
     };
 }

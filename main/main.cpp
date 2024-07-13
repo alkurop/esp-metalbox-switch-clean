@@ -18,29 +18,24 @@ const gpio_num_t wakeUpPins[PIN_SIZE] = {B1_PIN};
 
 static Button b1;
 static Led l1;
-static Sleeper s1;
-static Timer t1;
-
-auto onTimeOut = [](Timer *timer)
-{
-    ESP_LOGI(TAG, "On timeout");
-    t1.startOneShot(5);
-};
+static Sleeper s1(wakeUpPins, PIN_SIZE, 5);
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
     esp_rom_printf("button %d changed to %d\n", number, state);
     l1.set(state);
-    // s1.recordInteraction();
+    s1.recordInteraction();
 };
 
 auto beforeSleep = []()
 {
+    ESP_LOGI(TAG, "beforeSleep");
     b1.uninstall();
 };
 
 auto afterWake = []()
 {
+    ESP_LOGI(TAG, "afterWake");
     b1.install();
 };
 
@@ -52,8 +47,8 @@ extern "C" void app_main(void)
         ESP_LOGE(TAG, "Init button failed with code %d", result);
     }
     l1.init(L1_PIN);
-    // s1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
-    t1.init(onTimeOut);
-    t1.startOneShot(5);
+    s1.init(beforeSleep, afterWake);
+    s1.start();
+
     ESP_LOGI(TAG, ">>>>>>> connected");
 }
