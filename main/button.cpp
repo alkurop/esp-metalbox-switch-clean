@@ -3,7 +3,7 @@ using namespace App;
 
 IRAM_ATTR void ButtonHandler::button_handler(void *arg)
 {
-    auto button = reinterpret_cast<App ::Button *>(arg);
+    auto button = static_cast<Button *>(arg);
     button->ping();
 };
 
