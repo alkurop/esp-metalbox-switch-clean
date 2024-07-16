@@ -26,9 +26,11 @@ namespace App
         uint8_t *buffer;
         bool is_suspended;
         bool is_started;
+        bool is_authenticated;
         void onConnected(bool isConnected);
         void onSuspended(bool isSuspended);
         void onStarted(bool isStarted);
+        
         
     public:
         BleModule();
@@ -36,8 +38,10 @@ namespace App
         void init(ConnectionListener listener);
         void start();
         void stop();
+        void onAuthenticated(bool isAuthenticated);
         bool isStarted(){ return is_started; };
         bool isSuspended(){ return is_suspended; };
+        bool isAuthenticated(){ return is_authenticated; };
         bool isConnected();
         esp_err_t sendBatteryCharge(uint8_t charge);
         esp_err_t sendButtonPress(uint8_t button, bool isPressed);

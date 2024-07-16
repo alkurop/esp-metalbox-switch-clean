@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
 
-
-
 #include "esp_hid_gap.h"
 
 static const char *TAG = "ESP_HID_GAP";
@@ -70,6 +68,7 @@ const char *esp_ble_key_type_str(esp_ble_key_type_t key_type)
     return key_str;
 }
 
+static auth_callback_t auth_callback;
 
 /*
  * BLE GAP
@@ -95,14 +94,15 @@ static void ble_gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_p
     case ESP_GAP_BLE_AUTH_CMPL_EVT:
         if (!param->ble_security.auth_cmpl.success)
         {
+            (*auth_callback)(false);
             // if AUTH ERROR,hid maybe don't work.
             ESP_LOGE(TAG, "BLE GAP AUTH ERROR: 0x%x", param->ble_security.auth_cmpl.fail_reason);
         }
         else
         {
+            (*auth_callback)(true);
             ESP_LOGI(TAG, "BLE GAP AUTH SUCCESS");
         }
-        ble_hid_task_start_up();
         break;
 
     case ESP_GAP_BLE_KEY_EVT: // shows the ble key info share with peer device to the user.
@@ -326,8 +326,9 @@ static esp_err_t init_low_level(uint8_t mode)
     return ret;
 }
 
-esp_err_t esp_hid_gap_init(uint8_t mode)
+esp_err_t esp_hid_gap_init(uint8_t mode, auth_callback_t cb)
 {
+    auth_callback = cb;
     esp_err_t ret;
     if (!mode || mode > ESP_BT_MODE_BTDM)
     {

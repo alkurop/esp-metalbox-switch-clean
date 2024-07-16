@@ -2,53 +2,31 @@
 
 using namespace App;
 
-BleModule::BleModule()
-{
-    singletonBleModule = this;
-}
-BleModule::~BleModule()
-{
-    singletonBleModule = nullptr;
-}
-
-void BleModule::init(ConnectionListener listener)
-{
-    this->connectionListener = listener;
-};
+BleModule::BleModule() { singletonBleModule = this; }
+BleModule::~BleModule() { singletonBleModule = nullptr; }
+void BleModule::init(ConnectionListener listener) { this->connectionListener = listener; };
 void BleModule::onConnected(bool isConnected)
 {
     connectionListener(isConnected);
-
     if (!isConnected)
-    {
         esp_hid_ble_gap_adv_start();
-    }
 };
-void BleModule::onSuspended(bool isSuspended)
-{
-    is_suspended = isSuspended;
-    // do nothing
-};
+
+void BleModule::onSuspended(bool isSuspended) { is_suspended = isSuspended; };
 
 void BleModule::onStarted(bool isStarted)
 {
     is_started = isStarted;
     if (isStarted)
-    {
         esp_hid_ble_gap_adv_start();
-    }
 };
 
 bool BleModule::isConnected()
 {
     if (!device_handle)
-    {
         return false;
-    }
     else
-    {
         return esp_hidd_dev_connected(device_handle);
-    }
 };
 
 void BleModule::hidEventCallback(void *handler_args, esp_event_base_t base, int32_t id, void *event_data)
@@ -122,6 +100,14 @@ static void ble_hidd_event_callback(void *handler_args, esp_event_base_t base, i
     singletonBleModule->hidEventCallback(handler_args, base, id, event_data);
 };
 
+static void auth_callback(bool isAuthenticated) { singletonBleModule->onAuthenticated(isAuthenticated); };
+
+void BleModule::onAuthenticated(bool isAuthenticated)
+{
+    is_authenticated = is_authenticated;
+    ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
+};
+
 void BleModule::start()
 {
     esp_err_t ret;
@@ -135,7 +121,7 @@ void BleModule::start()
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "setting hid gap, mode:%d", HID_DEV_MODE);
-    ret = esp_hid_gap_init(HID_DEV_MODE);
+    ret = esp_hid_gap_init(HID_DEV_MODE, auth_callback);
     ESP_ERROR_CHECK(ret);
 
     ret = esp_hid_ble_gap_adv_init(ESP_HID_APPEARANCE_GAMEPAD, ble_hid_config.device_name);

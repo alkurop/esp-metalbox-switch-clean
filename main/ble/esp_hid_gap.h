@@ -37,6 +37,9 @@ extern "C"
 
 {
 #endif
+
+    typedef void (*auth_callback_t)(bool is_authed); /**< function called when authentication is */
+
     typedef struct esp_hidh_scan_result_s
     {
         struct esp_hidh_scan_result_s *next;
@@ -61,7 +64,7 @@ extern "C"
         };
     } esp_hid_scan_result_t;
 
-    esp_err_t esp_hid_gap_init(uint8_t mode);
+    esp_err_t esp_hid_gap_init(uint8_t mode, auth_callback_t cb);
 
     esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name);
 
