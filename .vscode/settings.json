@@ -94,7 +94,8 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "freertos.h": "c"
     },
     "git.ignoreLimitWarning": true
 }
