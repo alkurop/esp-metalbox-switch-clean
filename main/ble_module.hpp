@@ -36,7 +36,7 @@ namespace App
         BleModule();
         ~BleModule();
         void init(ConnectionListener listener);
-        void start(uint8_t batteryLevel);
+        void start(uint8_t battery_level);
         void stop();
         void onAuthenticated(bool isAuthenticated);
         bool isStarted(){ return is_started; };
@@ -154,7 +154,7 @@ namespace App
             .serial_number = "001",
             .report_maps = ble_report_maps,
             .report_maps_len = 1,
-            .batteryLevel = 20
+            .battery_level = 20
     };
     static BleModule *singletonBleModule;
 

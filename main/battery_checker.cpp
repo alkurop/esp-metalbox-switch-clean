@@ -5,8 +5,8 @@ using namespace App;
 static void batteryCheckerTask(void *arg)
 {
     auto batteryChecker = static_cast<BatteryChecker *>(arg);
-    uint8_t batteryLevel = batteryChecker->checkBatteryLevel();
-    batteryChecker->batteryListener(batteryLevel);
+    uint8_t battery_level = batteryChecker->checkBatteryLevel();
+    batteryChecker->batteryListener(battery_level);
     vTaskDelete(NULL);
 }
 

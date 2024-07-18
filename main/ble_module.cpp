@@ -108,7 +108,7 @@ void BleModule::onAuthenticated(bool isAuthenticated)
     ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
 };
 
-void BleModule::start(uint8_t batteryLevel)
+void BleModule::start(uint8_t battery_level)
 {
     esp_err_t ret;
 
@@ -132,8 +132,8 @@ void BleModule::start(uint8_t batteryLevel)
         ESP_LOGE(TAG, "GATTS register callback failed: %d", ret);
         return;
     }
-    ESP_LOGI(TAG, "setting ble device battery level %d", batteryLevel);
-    ble_hid_config.batteryLevel = batteryLevel;
+    ESP_LOGI(TAG, "setting ble device battery level %d", battery_level);
+    ble_hid_config.battery_level = battery_level;
     ESP_ERROR_CHECK(esp_hidd_dev_init(&ble_hid_config, ESP_HID_TRANSPORT_BLE, ble_hidd_event_callback, &device_handle));
 };
 
