@@ -21,7 +21,7 @@ using namespace App;
 
 #define PIN_SIZE 3
 #define SLEEPER_TIMEOUT_SECONDS 10 * 60
-#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 60
+#define BATTERY_CHECKER_TIMEOUT_SECONDS 1  * 10
 
 gpio_num_t wakeUpPins[] = {B1_PIN, B2_PIN, B3_PIN};
 
@@ -55,7 +55,7 @@ auto afterWake = []()
     button2.install();
     button3.install();
     batteryChecker.start();
-    ble.start();
+    ble.start(batteryChecker.getBatteryLevel());
 };
 
 auto onBatteryChecker = [](uint8_t value)
@@ -71,16 +71,17 @@ auto connectionListener = [](bool connected)
 
 extern "C" void app_main(void)
 {
+    ESP_ERROR_CHECK(button3.init(B3_PIN, 3, buttonPressListener));
     ESP_ERROR_CHECK(button1.init(B1_PIN, 1, buttonPressListener));
     ESP_ERROR_CHECK(button2.init(B2_PIN, 2, buttonPressListener));
-    ESP_ERROR_CHECK(button3.init(B3_PIN, 3, buttonPressListener));
     led1.init(L1_PIN);
     sleeper.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     sleeper.start();
     batteryChecker.init(onBatteryChecker);
     batteryChecker.start();
+
     ble.init(connectionListener);
-    ble.start();
+    ble.start(batteryChecker.getBatteryLevel());
 
     ESP_LOGI(TAG, ">>>>>>> ACTIVE");
 }

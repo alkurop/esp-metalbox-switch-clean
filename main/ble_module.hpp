@@ -36,7 +36,7 @@ namespace App
         BleModule();
         ~BleModule();
         void init(ConnectionListener listener);
-        void start();
+        void start(uint8_t batteryLevel);
         void stop();
         void onAuthenticated(bool isAuthenticated);
         bool isStarted(){ return is_started; };
@@ -153,7 +153,8 @@ namespace App
             .manufacturer_name = "Metalbox",
             .serial_number = "001",
             .report_maps = ble_report_maps,
-            .report_maps_len = 1
+            .report_maps_len = 1,
+            .batteryLevel = 20
     };
     static BleModule *singletonBleModule;
 

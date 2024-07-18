@@ -5,7 +5,9 @@ using namespace App;
 static void batteryCheckerTask(void *arg)
 {
     auto batteryChecker = static_cast<BatteryChecker *>(arg);
-    batteryChecker->runBatteryCheckerTask();
+    uint8_t batteryLevel = batteryChecker->checkBatteryLevel();
+    batteryChecker->batteryListener(batteryLevel);
+    vTaskDelete(NULL);
 }
 
 BatteryChecker::BatteryChecker(gpio_num_t enablePin, gpio_num_t checkPin, uint16_t timeoutSeconds)
@@ -23,30 +25,31 @@ void BatteryChecker::init(BatteryListener listener)
 {
     this->batteryListener = listener;
     this->timer.init(this->timeoutListener);
+    batteryLevel = checkBatteryLevel();
 };
 
 void BatteryChecker::stop()
 {
     timer.stop();
 };
-static uint8_t mockBatteryValue;
+static uint8_t mockBatteryValue = 10;
 
 void BatteryChecker::start()
 {
     timer.startPeriodic(timeoutSeconds);
 };
 
-void BatteryChecker::runBatteryCheckerTask()
+uint8_t BatteryChecker::checkBatteryLevel()
 {
     // pretend that it's working
     ESP_LOGI(TAG, "Battery checker task started");
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    vTaskDelay(pdMS_TO_TICKS(500));
+
     mockBatteryValue += 10;
     if (mockBatteryValue > 100)
     {
         mockBatteryValue = 1;
     }
-    this->batteryListener(mockBatteryValue);
-    ESP_LOGI(TAG, "Battery checker task ended in %d seconds", 2);
-    vTaskDelete(NULL);
+    vTaskDelay(pdMS_TO_TICKS(500));
+    return mockBatteryValue;
 };

@@ -23,7 +23,7 @@ namespace App
         gpio_num_t enablePin;
         gpio_num_t checkPin;
         TimeoutListener timeoutListener;
-
+        uint8_t batteryLevel;
         TaskHandle_t *taskHandle;
 
     public:
@@ -33,7 +33,8 @@ namespace App
         void init(BatteryListener listener);
         void start();
         void stop();
-        void runBatteryCheckerTask();
+        uint8_t getBatteryLevel() { return batteryLevel; };
+        uint8_t checkBatteryLevel();
     };
 
 } // namespace App

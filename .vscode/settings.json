@@ -95,7 +95,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "freertos.h": "c"
+        "freertos.h": "c",
+        "esp_hid_common.h": "c"
     },
     "git.ignoreLimitWarning": true
 }
