@@ -29,12 +29,13 @@ void BatteryChecker::stop()
 {
     timer.stop();
 };
+static uint8_t mockBatteryValue;
+
 void BatteryChecker::start()
 {
     timer.startPeriodic(timeoutSeconds);
 };
 
-static uint8_t mockBatteryValue;
 void BatteryChecker::runBatteryCheckerTask()
 {
     // pretend that it's working

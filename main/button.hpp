@@ -31,6 +31,8 @@ namespace App
         std::function<void(void)> margin;
 
     public:
+        TaskHandle_t handle;
+
         esp_err_t init(gpio_num_t pin, uint8_t number, ButtonListener listener);
         bool getState() { return state; }
         void ping();

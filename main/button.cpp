@@ -1,10 +1,20 @@
 #include "button.hpp"
 using namespace App;
 
+static void buttonSender(void *arg)
+{
+    auto button = static_cast<Button *>(arg);
+    while (1)
+    {
+        vTaskSuspend(button->handle);
+        button->ping();
+    }
+}
+
 IRAM_ATTR void ButtonHandler::button_handler(void *arg)
 {
     auto button = static_cast<Button *>(arg);
-    button->ping();
+    xTaskResumeFromISR(button->handle);
 };
 
 esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)
@@ -25,12 +35,14 @@ esp_err_t Button::install()
     ESP_RETURN_ON_ERROR(gpio_install_isr_service(0), TAG, "install button isr");
 
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), TAG, "gpio_isr_handler_add");
+    xTaskCreate(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 2, &handle);
     return ESP_OK;
 };
 
 esp_err_t Button::uninstall()
 {
     gpio_uninstall_isr_service();
+    vTaskDelete(handle);
     return ESP_OK;
 };
 

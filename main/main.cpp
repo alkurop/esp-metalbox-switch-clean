@@ -19,7 +19,7 @@ using namespace App;
 
 #define PIN_SIZE 1
 #define SLEEPER_TIMEOUT_SECONDS 10 * 60
-#define BATTERY_CHECKER_TIMEOUT_SECONDS 1 * 20
+#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 60
 
 gpio_num_t wakeUpPins[PIN_SIZE] = {B1_PIN};
 
@@ -34,6 +34,7 @@ auto buttonPressListener = [](uint8_t number, bool state)
     led1.set(state);
     sleeper.recordInteraction();
     ble.sendButtonPress(number, state);
+
 };
 
 auto beforeSleep = []()
