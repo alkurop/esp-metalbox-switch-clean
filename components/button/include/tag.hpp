@@ -1,6 +1,6 @@
 #pragma once
 
-namespace BTN
+namespace BTN_TAG
 {
-    const constexpr char *BUTTON_TAG{"Button module"};
+    const constexpr char *TAG{"Button module"};
 } // namespace App

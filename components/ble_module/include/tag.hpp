@@ -1,6 +1,6 @@
 #pragma once
 
-namespace BLE
+namespace BLE_TAG
 {
-    const constexpr char *BLE_TAG{"Ble module"};
+    const constexpr char *TAG{"Ble module"};
 } // namespace App

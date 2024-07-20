@@ -1,7 +1,8 @@
 #include "battery_checker.hpp"
 
 using namespace TMR;
-using namespace App;
+using namespace bchk;
+using namespace BCHK_TAG;
 
 static void batteryCheckerTask(void *arg)
 {

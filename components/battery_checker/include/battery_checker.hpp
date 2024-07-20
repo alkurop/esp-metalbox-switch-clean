@@ -12,7 +12,7 @@
 
 using namespace TMR;
 
-namespace App
+namespace bchk
 {
     using BatteryListener = std::function<void(uint8_t)>;
 

@@ -13,7 +13,8 @@
 
 using namespace std;
 using namespace TMR;
-namespace App
+
+namespace sleeper
 {
     using SleeperCallback = function<void(void)>;
 
