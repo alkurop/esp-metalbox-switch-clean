@@ -1,5 +1,6 @@
 #include "button.hpp"
-using namespace App;
+using namespace button;
+using namespace BTN_TAG;
 
 static void buttonSender(void *arg)
 {

@@ -10,7 +10,9 @@
 #include "timer.hpp"
 #include "tag.hpp"
 
-namespace App
+using namespace TMR;
+
+namespace bchk
 {
     using BatteryListener = std::function<void(uint8_t)>;
 

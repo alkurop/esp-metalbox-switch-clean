@@ -1,6 +1,7 @@
 #include "ble_module.hpp"
 
-using namespace App;
+using namespace BLE;
+using namespace BLE_TAG;
 
 BleModule::BleModule() { singletonBleModule = this; }
 BleModule::~BleModule() { singletonBleModule = nullptr; }

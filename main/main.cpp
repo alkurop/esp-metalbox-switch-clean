@@ -12,6 +12,11 @@
 #include "ble_module.hpp"
 
 using namespace App;
+using namespace BLE;
+using namespace button;
+using namespace sleeper;
+using namespace bchk;
+
 #define B1_PIN GPIO_NUM_0
 #define B2_PIN GPIO_NUM_2
 #define B3_PIN GPIO_NUM_3
@@ -29,14 +34,14 @@ static Button button1;
 static Button button2;
 static Button button3;
 static Led led1;
-static Sleeper sleeper(SLEEPER_TIMEOUT_SECONDS);
+static Sleeper sleeper1(SLEEPER_TIMEOUT_SECONDS);
 static BatteryChecker batteryChecker(BATTERY_CHECK_ENABLE_PIN, BATTERY_CHECK_PIN, BATTERY_CHECKER_TIMEOUT_SECONDS);
 static BleModule ble;
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
     led1.set(state);
-    sleeper.recordInteraction();
+    sleeper1.recordInteraction();
     ble.sendButtonPress(number, state);
 };
 
@@ -75,8 +80,8 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(button1.init(B1_PIN, 1, buttonPressListener));
     ESP_ERROR_CHECK(button2.init(B2_PIN, 2, buttonPressListener));
     led1.init(L1_PIN);
-    sleeper.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
-    sleeper.start();
+    sleeper1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
+    sleeper1.start();
     batteryChecker.init(onBatteryChecker);
     batteryChecker.start();
 

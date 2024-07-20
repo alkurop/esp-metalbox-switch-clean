@@ -1,6 +1,7 @@
 #include "sleeper.hpp"
 
-using namespace App;
+using namespace sleeper;
+using namespace SLP_TAG;
 
 Sleeper::Sleeper(uint32_t timeoutSeconds)
 {

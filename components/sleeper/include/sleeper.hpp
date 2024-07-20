@@ -12,7 +12,9 @@
 #include "timer.hpp"
 
 using namespace std;
-namespace App
+using namespace TMR;
+
+namespace sleeper
 {
     using SleeperCallback = function<void(void)>;
 
