@@ -1,6 +1,6 @@
 #include "ble_module.hpp"
 
-using namespace BLE;
+using namespace ble;
 using namespace BLE_TAG;
 
 BleModule::BleModule() { singletonBleModule = this; }

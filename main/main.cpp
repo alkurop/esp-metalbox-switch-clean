@@ -12,7 +12,7 @@
 #include "ble_module.hpp"
 
 using namespace App;
-using namespace BLE;
+using namespace ble;
 using namespace button;
 using namespace sleeper;
 using namespace bchk;
@@ -36,13 +36,13 @@ static Button button3;
 static Led led1;
 static Sleeper sleeper1(SLEEPER_TIMEOUT_SECONDS);
 static BatteryChecker batteryChecker(BATTERY_CHECK_ENABLE_PIN, BATTERY_CHECK_PIN, BATTERY_CHECKER_TIMEOUT_SECONDS);
-static BleModule ble;
+static BleModule ble1;
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
     led1.set(state);
     sleeper1.recordInteraction();
-    ble.sendButtonPress(number, state);
+    ble1.sendButtonPress(number, state);
 };
 
 auto beforeSleep = []()
@@ -51,7 +51,7 @@ auto beforeSleep = []()
     button2.uninstall();
     button3.uninstall();
     batteryChecker.stop();
-    ble.stop();
+    ble1.stop();
 };
 
 auto afterWake = []()
@@ -60,13 +60,13 @@ auto afterWake = []()
     button2.install();
     button3.install();
     batteryChecker.start();
-    ble.start(batteryChecker.getBatteryLevel());
+    ble1.start(batteryChecker.getBatteryLevel());
 };
 
 auto onBatteryChecker = [](uint8_t value)
 {
     ESP_LOGI(TAG, "Battery value %d", value);
-    ble.sendBatteryCharge(value);
+    ble1.sendBatteryCharge(value);
 };
 
 auto connectionListener = [](bool connected)
@@ -85,8 +85,8 @@ extern "C" void app_main(void)
     batteryChecker.init(onBatteryChecker);
     batteryChecker.start();
 
-    ble.init(connectionListener);
-    ble.start(batteryChecker.getBatteryLevel());
+    ble1.init(connectionListener);
+    ble1.start(batteryChecker.getBatteryLevel());
 
     ESP_LOGI(TAG, ">>>>>>> ACTIVE");
 }

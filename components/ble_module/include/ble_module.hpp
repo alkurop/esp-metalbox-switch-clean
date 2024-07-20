@@ -13,7 +13,7 @@
 #include "tag.hpp"
 #include "esp_hid_gap.h"
 
-namespace BLE
+namespace ble
 {
     using ConnectionListener = std::function<void(bool)>;
 
