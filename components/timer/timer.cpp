@@ -1,6 +1,6 @@
 #include "timer.hpp"
 
-using namespace App;
+using namespace TMR;
 
 static void onTimerCallback(void *arg)
 {

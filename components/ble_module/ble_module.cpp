@@ -1,6 +1,6 @@
 #include "ble_module.hpp"
 
-using namespace App;
+using namespace BLE;
 
 BleModule::BleModule() { singletonBleModule = this; }
 BleModule::~BleModule() { singletonBleModule = nullptr; }
@@ -37,24 +37,24 @@ void BleModule::hidEventCallback(void *handler_args, esp_event_base_t base, int3
     {
     case ESP_HIDD_START_EVENT:
     {
-        ESP_LOGI(TAG, "START");
+        ESP_LOGI(BLE_TAG, "START");
         onStarted(true);
         break;
     }
     case ESP_HIDD_CONNECT_EVENT:
     {
-        ESP_LOGI(TAG, "CONNECT");
+        ESP_LOGI(BLE_TAG, "CONNECT");
         onConnected(true);
         break;
     }
     case ESP_HIDD_PROTOCOL_MODE_EVENT:
     {
-        ESP_LOGI(TAG, "PROTOCOL MODE[%u]: %s", param->protocol_mode.map_index, param->protocol_mode.protocol_mode ? "REPORT" : "BOOT");
+        ESP_LOGI(BLE_TAG, "PROTOCOL MODE[%u]: %s", param->protocol_mode.map_index, param->protocol_mode.protocol_mode ? "REPORT" : "BOOT");
         break;
     }
     case ESP_HIDD_CONTROL_EVENT:
     {
-        ESP_LOGI(TAG, "CONTROL[%u]: %sSUSPEND", param->control.map_index, param->control.control ? "EXIT_" : "");
+        ESP_LOGI(BLE_TAG, "CONTROL[%u]: %sSUSPEND", param->control.map_index, param->control.control ? "EXIT_" : "");
         if (param->control.control)
         {
             onSuspended(false);
@@ -67,26 +67,26 @@ void BleModule::hidEventCallback(void *handler_args, esp_event_base_t base, int3
     }
     case ESP_HIDD_OUTPUT_EVENT:
     {
-        ESP_LOGI(TAG, "OUTPUT[%u]: %8s ID: %2u, Len: %d, Data:", param->output.map_index, esp_hid_usage_str(param->output.usage), param->output.report_id, param->output.length);
-        ESP_LOG_BUFFER_HEX(TAG, param->output.data, param->output.length);
+        ESP_LOGI(BLE_TAG, "OUTPUT[%u]: %8s ID: %2u, Len: %d, Data:", param->output.map_index, esp_hid_usage_str(param->output.usage), param->output.report_id, param->output.length);
+        ESP_LOG_BUFFER_HEX(BLE_TAG, param->output.data, param->output.length);
         break;
     }
     case ESP_HIDD_FEATURE_EVENT:
     {
-        ESP_LOGI(TAG, "FEATURE[%u]: %8s ID: %2u, Len: %d, Data:", param->feature.map_index, esp_hid_usage_str(param->feature.usage), param->feature.report_id, param->feature.length);
-        ESP_LOG_BUFFER_HEX(TAG, param->feature.data, param->feature.length);
+        ESP_LOGI(BLE_TAG, "FEATURE[%u]: %8s ID: %2u, Len: %d, Data:", param->feature.map_index, esp_hid_usage_str(param->feature.usage), param->feature.report_id, param->feature.length);
+        ESP_LOG_BUFFER_HEX(BLE_TAG, param->feature.data, param->feature.length);
         break;
     }
     case ESP_HIDD_DISCONNECT_EVENT:
     {
-        ESP_LOGI(TAG, "DISCONNECT: %s", esp_hid_disconnect_reason_str(esp_hidd_dev_transport_get(param->disconnect.dev), param->disconnect.reason));
+        ESP_LOGI(BLE_TAG, "DISCONNECT: %s", esp_hid_disconnect_reason_str(esp_hidd_dev_transport_get(param->disconnect.dev), param->disconnect.reason));
         onConnected(false);
         break;
     }
     case ESP_HIDD_STOP_EVENT:
     {
         onStarted(false);
-        ESP_LOGI(TAG, "STOP");
+        ESP_LOGI(BLE_TAG, "STOP");
         break;
     }
     default:
@@ -105,7 +105,7 @@ static void auth_callback(bool isAuthenticated) { singletonBleModule->onAuthenti
 void BleModule::onAuthenticated(bool isAuthenticated)
 {
     is_authenticated = is_authenticated;
-    ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
+    ESP_LOGI(BLE_TAG, "Is Authenticated %d", isAuthenticated);
 };
 
 void BleModule::start(uint8_t battery_level)
@@ -120,7 +120,7 @@ void BleModule::start(uint8_t battery_level)
     }
     ESP_ERROR_CHECK(ret);
 
-    ESP_LOGI(TAG, "setting hid gap, mode:%d", HID_DEV_MODE);
+    ESP_LOGI(BLE_TAG, "setting hid gap, mode:%d", HID_DEV_MODE);
     ret = esp_hid_gap_init(HID_DEV_MODE, auth_callback);
     ESP_ERROR_CHECK(ret);
 
@@ -129,10 +129,10 @@ void BleModule::start(uint8_t battery_level)
     ESP_ERROR_CHECK(ret);
     if ((ret = esp_ble_gatts_register_callback(esp_hidd_gatts_event_handler)) != ESP_OK)
     {
-        ESP_LOGE(TAG, "GATTS register callback failed: %d", ret);
+        ESP_LOGE(BLE_TAG, "GATTS register callback failed: %d", ret);
         return;
     }
-    ESP_LOGI(TAG, "setting ble device battery level %d", battery_level);
+    ESP_LOGI(BLE_TAG, "setting ble device battery level %d", battery_level);
     ble_hid_config.battery_level = battery_level;
     ESP_ERROR_CHECK(esp_hidd_dev_init(&ble_hid_config, ESP_HID_TRANSPORT_BLE, ble_hidd_event_callback, &device_handle));
 };
@@ -145,7 +145,7 @@ void BleModule::stop()
 esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
 {
     esp_err_t res = esp_hidd_dev_battery_set(device_handle, charge);
-    ESP_LOGI(TAG, "Send battery charge %d", res);
+    ESP_LOGI(BLE_TAG, "Send battery charge %d", res);
     return res;
 };
 
@@ -158,7 +158,7 @@ esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
     }
 
     esp_err_t res = esp_hidd_dev_input_set(device_handle, 0, 0x03, buffer, sizeof(buffer));
-    ESP_LOGI(TAG, "Send button result %d", res);
-    ESP_LOGI(TAG, "Send button buffer %d", buffer[0]);
+    ESP_LOGI(BLE_TAG, "Send button result %d", res);
+    ESP_LOGI(BLE_TAG, "Send button buffer %d", buffer[0]);
     return res;
 };

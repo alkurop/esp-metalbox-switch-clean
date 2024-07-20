@@ -17,7 +17,7 @@ namespace ButtonHandler
     void button_handler(void *arg);
 }
 
-namespace App
+namespace BTN
 {
     using ButtonListener = std::function<void(uint8_t, bool)>;
     class Button

@@ -11,9 +11,9 @@
 #include <esp_hidd.h>
 
 #include "tag.hpp"
-#include "ble/esp_hid_gap.h"
+#include "esp_hid_gap.h"
 
-namespace App
+namespace BLE
 {
     using ConnectionListener = std::function<void(bool)>;
 

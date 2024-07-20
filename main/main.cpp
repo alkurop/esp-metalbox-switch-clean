@@ -12,6 +12,9 @@
 #include "ble_module.hpp"
 
 using namespace App;
+using namespace BLE;
+using namespace BTN;
+
 #define B1_PIN GPIO_NUM_0
 #define B2_PIN GPIO_NUM_2
 #define B3_PIN GPIO_NUM_3

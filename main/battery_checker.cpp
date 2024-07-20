@@ -1,5 +1,6 @@
 #include "battery_checker.hpp"
 
+using namespace TMR;
 using namespace App;
 
 static void batteryCheckerTask(void *arg)

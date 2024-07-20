@@ -1,5 +1,5 @@
 #include "button.hpp"
-using namespace App;
+using namespace BTN;
 
 static void buttonSender(void *arg)
 {
@@ -24,16 +24,16 @@ esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)
     this->pin = pin;
     auto config = createConfig(pin);
 
-    ESP_RETURN_ON_ERROR(gpio_config(&config), TAG, "config button");
+    ESP_RETURN_ON_ERROR(gpio_config(&config), BUTTON_TAG, "config button");
 
-    ESP_LOGI(TAG, "gpio wakeup source is ready");
+    ESP_LOGI(BUTTON_TAG, "gpio wakeup source is ready");
     return this->install();
 };
 
 esp_err_t Button::install()
 {
     gpio_install_isr_service(0);
-    ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), TAG, "gpio_isr_handler_add");
+    ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), BUTTON_TAG, "gpio_isr_handler_add");
     xTaskCreate(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 2, &handle);
     return ESP_OK;
 };
