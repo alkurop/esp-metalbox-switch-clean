@@ -21,6 +21,8 @@ BatteryChecker::BatteryChecker(gpio_num_t enablePin, gpio_num_t checkPin, uint16
     {
         xTaskCreate(batteryCheckerTask, "batteryCheckerTask", 3 * 1024, this, configMAX_PRIORITIES - 2, taskHandle);
     };
+    this->adc_cali_handle = NULL;
+    this->adc_handle = NULL;
 };
 
 esp_err_t BatteryChecker::init(BatteryListener listener)
@@ -35,7 +37,7 @@ esp_err_t BatteryChecker::init(BatteryListener listener)
                                GPIO_INTR_DISABLE};
     gpio_config(&senderConfig);
 
-    initAdc();
+    ESP_RETURN_ON_ERROR(initAdc(), TAG, "Init adc");
 
     batteryLevel = checkBatteryLevel();
     return ESP_OK;
@@ -44,9 +46,9 @@ esp_err_t BatteryChecker::init(BatteryListener listener)
 esp_err_t BatteryChecker::initAdc()
 {
 
-    if (this->checkPin != GPIO_NUM_4)
-        return ESP_ERR_INVALID_ARG;
-    this->adc_channel = ADC_CHANNEL_4;
+    this->adc_channel = (adc_channel_t)this->checkPin;
+    ESP_LOGI(TAG, "ADC_CHANNEL %d", this->adc_channel);
+
     this->adc_cali_handle = NULL;
 
     adc_oneshot_unit_init_cfg_t init_config = {
@@ -60,20 +62,22 @@ esp_err_t BatteryChecker::initAdc()
 
     ESP_RETURN_ON_ERROR(adc_oneshot_new_unit(&init_config, &adc_handle), TAG, "ADC one shot new init failed");
     ESP_RETURN_ON_ERROR(adc_oneshot_config_channel(adc_handle, adc_channel, &config), TAG, "ADC one shot channel config failed");
-    ESP_RETURN_ON_ERROR(adc_calibration_init(BCH_ADC_UNIT, adc_channel, BCH_ADC_ATTEN, &adc_cali_handle), TAG, "ADC calibration failed");
+    ESP_RETURN_ON_ERROR(adc_calibration_init(), TAG, "ADC calibration failed");
     return ESP_OK;
 };
 
 esp_err_t BatteryChecker::deinit()
 {
-    return adc_cali_delete_scheme_curve_fitting(adc_cali_handle);
+    if (!adc_cali_handle)
+        return ESP_OK;
+    ESP_RETURN_ON_ERROR(adc_cali_delete_scheme_curve_fitting(adc_cali_handle), TAG, "Cali deinit");
+    return adc_oneshot_del_unit(adc_handle);
 };
 
 void BatteryChecker::stop()
 {
     timer.stop();
 };
-static uint8_t mockBatteryValue = 10;
 
 void BatteryChecker::start()
 {
@@ -83,31 +87,49 @@ void BatteryChecker::start()
 uint8_t BatteryChecker::checkBatteryLevel()
 {
     ESP_LOGI(TAG, "Battery checker task started");
-    gpio_set_level(enablePin, 1);
-    vTaskDelay(pdMS_TO_TICKS(2000));
 
-    mockBatteryValue += 10;
-    if (mockBatteryValue > 100)
+    int calibrated;
+    esp_err_t result;
+    int sum = 0;
+    for (int i = 0; i < BCH_TAKES_NUM; i++)
     {
-        mockBatteryValue = 1;
+        int raw = 0;
+        vTaskDelay(pdMS_TO_TICKS(BCH_TAKES_DELAY_MILLIS));
+        gpio_set_level(enablePin, 1);
+        vTaskDelay(pdMS_TO_TICKS(10));
+        result = adc_oneshot_read(this->adc_handle, this->adc_channel, &raw);
+        if (result != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Adc read failed with code %d", result);
+            return 0;
+        }
+        sum += raw;
+        gpio_set_level(enablePin, 0);
     }
-    gpio_set_level(enablePin, 0);
+    int raw = sum / BCH_TAKES_NUM;
 
-    return mockBatteryValue;
+    result = adc_cali_raw_to_voltage(this->adc_cali_handle, raw, &calibrated);
+
+    if (result != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Adc calibration convert failed with code %d", result);
+        return 0;
+    }
+
+    ESP_LOGI(TAG, "RAW %d", raw);
+    ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
+
+    return calibrated;
 };
 
-esp_err_t BatteryChecker::adc_calibration_init(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle)
+esp_err_t BatteryChecker::adc_calibration_init()
 {
-    adc_cali_handle_t handle = NULL;
-    esp_err_t ret = ESP_FAIL;
-    bool calibrated = false;
-
     ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
     adc_cali_curve_fitting_config_t cali_config = {
-        .unit_id = unit,
-        .chan = channel,
-        .atten = atten,
+        .unit_id = BCH_ADC_UNIT,
+        .chan = adc_channel,
+        .atten = BCH_ADC_ATTEN,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
-    return adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
+    return adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
 }

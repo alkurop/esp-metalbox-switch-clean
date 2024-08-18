@@ -146,7 +146,10 @@ void BleModule::stop()
 esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
 {
     esp_err_t res = esp_hidd_dev_battery_set(device_handle, charge);
-    ESP_LOGI(TAG, "Send battery charge %d", res);
+    if (res != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Send battery charge with result %d", res);
+    }
     return res;
 };
 

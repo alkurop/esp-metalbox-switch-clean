@@ -14,12 +14,21 @@
 #include "timer.hpp"
 #include "tag.hpp"
 
-#define BCH_ADC_ATTEN ADC_ATTEN_DB_11
-#define BCH_ADC_BW ADC_BITWIDTH_9
+#define BCH_ADC_ATTEN ADC_ATTEN_DB_12
+#define BCH_ADC_BW ADC_BITWIDTH_DEFAULT
 #define BCH_ADC_UNIT ADC_UNIT_1
+#define BCH_TAKES_NUM 5
+#define BCH_TAKES_DELAY_MILLIS 50
 
 using namespace TMR;
 
+/**
+ Todo:
+ - add 100 nf capacitor to input
+ - check if it works after putting to sleep
+ - calibrate the voltage metering min max (now for 3,3 volt it shows 1625)
+ 
+*/
 namespace bchk
 {
     using BatteryListener = std::function<void(uint8_t)>;
@@ -42,7 +51,7 @@ namespace bchk
 
         esp_err_t initAdc();
         esp_err_t deinitAdc();
-        esp_err_t adc_calibration_init(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
+        esp_err_t adc_calibration_init();
 
     public:
         BatteryListener batteryListener;

@@ -18,17 +18,17 @@ using namespace button;
 using namespace sleeper;
 using namespace bchk;
 
-#define B1_PIN GPIO_NUM_0
-#define B2_PIN GPIO_NUM_2
-#define B3_PIN GPIO_NUM_3
-#define L1_PIN GPIO_NUM_1
+#define B1_PIN GPIO_NUM_7
+#define B2_PIN GPIO_NUM_1
+#define B3_PIN GPIO_NUM_2
+#define L1_PIN GPIO_NUM_3
 #define SEND_OFF_PIN GPIO_NUM_4
-#define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_7
-#define BATTERY_CHECK_PIN GPIO_NUM_8
+#define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_5
+#define BATTERY_CHECK_PIN GPIO_NUM_0
 
 #define PIN_SIZE 3
-#define SLEEPER_TIMEOUT_SECONDS 10 * 60
-#define BATTERY_CHECKER_TIMEOUT_SECONDS 1 * 10
+#define SLEEPER_TIMEOUT_SECONDS 10  
+#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 60
 
 gpio_num_t wakeUpPins[] = {B1_PIN, B2_PIN, B3_PIN};
 
@@ -46,7 +46,6 @@ auto buttonPressListener = [](uint8_t number, bool state)
     led1.set(state);
     sleeper1.recordInteraction();
     ble1.sendButtonPress(number, state);
-    sendOffSignal.sendOff();
 };
 
 auto beforeSleep = []()
@@ -87,10 +86,14 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(button1.init(B1_PIN, 1, buttonPressListener));
     ESP_ERROR_CHECK(button2.init(B2_PIN, 2, buttonPressListener));
     sendOffSignal.init();
-                                        
+
     sleeper1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     sleeper1.start();
-    batteryChecker.init(onBatteryChecker);
+    auto result = batteryChecker.init(onBatteryChecker);
+    if (result != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Battery checker init failed with status %d", result);
+    }
     batteryChecker.start();
 
     ble1.init(connectionListener);
