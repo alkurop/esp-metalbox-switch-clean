@@ -16,7 +16,7 @@ namespace App
             gpio_config_t config{(1ULL << pin),
                                  GPIO_MODE_OUTPUT,
                                  GPIO_PULLUP_DISABLE,
-                                 GPIO_PULLDOWN_DISABLE,
+                                 GPIO_PULLDOWN_ENABLE,
                                  GPIO_INTR_DISABLE};
             gpio_config(&config);
         }

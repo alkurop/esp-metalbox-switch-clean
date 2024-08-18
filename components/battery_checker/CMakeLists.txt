@@ -3,6 +3,6 @@ idf_component_register(SRCS
                        
 INCLUDE_DIRS "include"
                        
-REQUIRES timer driver log)
+REQUIRES timer driver log esp_adc)
 
 
