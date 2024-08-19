@@ -96,7 +96,7 @@ uint8_t BatteryChecker::checkBatteryLevel()
         int raw = 0;
         vTaskDelay(pdMS_TO_TICKS(BCH_TAKES_DELAY_MILLIS));
         gpio_set_level(enablePin, 1);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(20));
         result = adc_oneshot_read(this->adc_handle, this->adc_channel, &raw);
         if (result != ESP_OK)
         {
@@ -118,8 +118,9 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
+    uint8_t v = calibrated * 100 / 1450;
 
-    return calibrated;
+    return v;
 };
 
 esp_err_t BatteryChecker::adc_calibration_init()

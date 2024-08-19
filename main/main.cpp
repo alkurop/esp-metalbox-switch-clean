@@ -27,8 +27,8 @@ using namespace bchk;
 #define BATTERY_CHECK_PIN GPIO_NUM_0
 
 #define PIN_SIZE 3
-#define SLEEPER_TIMEOUT_SECONDS 10 * 2
-#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 1
+#define SLEEPER_TIMEOUT_SECONDS 10 * 60
+#define BATTERY_CHECKER_TIMEOUT_SECONDS 5 * 1
 
 gpio_num_t wakeUpPins[] = {B1_PIN, B2_PIN, B3_PIN};
 
