@@ -18,17 +18,17 @@ using namespace button;
 using namespace sleeper;
 using namespace bchk;
 
-#define B1_PIN GPIO_NUM_7
-#define B2_PIN GPIO_NUM_1
-#define B3_PIN GPIO_NUM_2
-#define L1_PIN GPIO_NUM_3
-#define SEND_OFF_PIN GPIO_NUM_4
-#define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_5
+#define B1_PIN GPIO_NUM_3
+#define B2_PIN GPIO_NUM_4
+#define B3_PIN GPIO_NUM_5
+#define L1_PIN GPIO_NUM_1
+#define SEND_OFF_PIN GPIO_NUM_6
+#define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_7
 #define BATTERY_CHECK_PIN GPIO_NUM_0
 
 #define PIN_SIZE 3
-#define SLEEPER_TIMEOUT_SECONDS 10  
-#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 60
+#define SLEEPER_TIMEOUT_SECONDS 10 * 2
+#define BATTERY_CHECKER_TIMEOUT_SECONDS 10 * 1
 
 gpio_num_t wakeUpPins[] = {B1_PIN, B2_PIN, B3_PIN};
 
