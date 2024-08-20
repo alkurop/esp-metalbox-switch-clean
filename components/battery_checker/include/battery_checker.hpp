@@ -14,7 +14,7 @@
 #include "timer.hpp"
 #include "tag.hpp"
 
-#define BCH_ADC_ATTEN ADC_ATTEN_DB_12
+#define BCH_ADC_ATTEN ADC_ATTEN_DB_6
 #define BCH_ADC_BW ADC_BITWIDTH_DEFAULT
 #define BCH_ADC_UNIT ADC_UNIT_1
 #define BCH_TAKES_NUM 5

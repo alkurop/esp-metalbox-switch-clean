@@ -3,6 +3,7 @@
 using namespace TMR;
 using namespace bchk;
 using namespace BCHK_TAG;
+using namespace std;
 
 static void batteryCheckerTask(void *arg)
 {
@@ -96,7 +97,7 @@ uint8_t BatteryChecker::checkBatteryLevel()
         int raw = 0;
         vTaskDelay(pdMS_TO_TICKS(BCH_TAKES_DELAY_MILLIS));
         gpio_set_level(enablePin, 1);
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(30));
         result = adc_oneshot_read(this->adc_handle, this->adc_channel, &raw);
         if (result != ESP_OK)
         {
@@ -118,9 +119,9 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
-    uint8_t v = calibrated * 100 / 1450;
+    int v = calibrated * 100 / 1535;
 
-    return v;
+    return (uint8_t)min(100, v);
 };
 
 esp_err_t BatteryChecker::adc_calibration_init()
