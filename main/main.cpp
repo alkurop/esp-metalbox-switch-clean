@@ -11,6 +11,8 @@
 #include "battery_checker.hpp"
 #include "ble_module.hpp"
 #include "timer.hpp"
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 using namespace App;
 using namespace ble;
@@ -30,7 +32,7 @@ using namespace TMR;
 #define PIN_SIZE 3
 #define SLEEPER_TIMEOUT_SECONDS 10 * 60
 #define BATTERY_CHECKER_TIMEOUT_SECONDS 60 * 2
-#define LAMP_OFF_TIME_SECONDS 10
+#define LAMP_OFF_TIME_SECONDS 5
 
 gpio_num_t wakeUpPins[] = {B1_PIN, B2_PIN, B3_PIN};
 
@@ -50,7 +52,10 @@ auto lampOffCallback = [](Timer *timer)
 
 auto buttonPressListener = [](uint8_t number, bool state)
 {
-    led1.set(!state);
+    ESP_LOGI(TAG, "Button value %d", number);
+    led1.set(state);
+    // lampOffTimer.stop();
+    // lampOffTimer.startOneShot(LAMP_OFF_TIME_SECONDS);
     sleeper1.recordInteraction();
     ble1.sendButtonPress(number, state);
 };
@@ -86,12 +91,14 @@ auto connectionListener = [](bool connected)
 
 extern "C" void app_main(void)
 {
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
     led1.init(L1_PIN);
     led1.set(true);
 
     lampOffTimer.init(lampOffCallback);
     lampOffTimer.startOneShot(LAMP_OFF_TIME_SECONDS);
-    
+
     ESP_ERROR_CHECK(button3.init(B3_PIN, 3, buttonPressListener));
     ESP_ERROR_CHECK(button1.init(B1_PIN, 1, buttonPressListener));
     ESP_ERROR_CHECK(button2.init(B2_PIN, 2, buttonPressListener));
