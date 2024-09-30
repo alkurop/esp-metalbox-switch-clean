@@ -1,0 +1,7 @@
+menu "Metalbox Device ID"
+config DEVICE_ID
+        string "device_id"
+        default "001"
+        help
+            Type device id of Metalbox
+endmenu
