@@ -39,7 +39,7 @@ while getopts ":hn:o:l:" option; do
    esac
 done
 
-echo "Builing uf2 binary"
+echo "Builing binary"
 echo "Device id $id"
 echo "Output Path $path"
 
