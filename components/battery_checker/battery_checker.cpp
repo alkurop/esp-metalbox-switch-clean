@@ -119,7 +119,7 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
-    int v = calibrated * 100 / 1535;
+    int v = calibrated * 100 / 1304;
 
     return (uint8_t)min(100, v);
 };
@@ -127,11 +127,11 @@ uint8_t BatteryChecker::checkBatteryLevel()
 esp_err_t BatteryChecker::adc_calibration_init()
 {
     ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
-    adc_cali_curve_fitting_config_t cali_config = {
+    adc_cali_curve_fitting_config_t calib_config = {
         .unit_id = BCH_ADC_UNIT,
         .chan = adc_channel,
         .atten = BCH_ADC_ATTEN,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
-    return adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
+    return adc_cali_create_scheme_curve_fitting(&calib_config, &adc_cali_handle);
 }

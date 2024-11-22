@@ -4,6 +4,6 @@ idf_component_register(SRCS
                        
 INCLUDE_DIRS "include"
                        
-REQUIRES bt nvs_flash esp_hid log)
+REQUIRES bt nvs_flash esp_hid log timer)
 
 

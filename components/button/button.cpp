@@ -23,6 +23,7 @@ esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)
     this->state = false;
     this->listener = listener;
     this->pin = pin;
+    this->number = number;
     auto config = createConfig(pin);
 
     ESP_RETURN_ON_ERROR(gpio_config(&config), TAG, "config button");

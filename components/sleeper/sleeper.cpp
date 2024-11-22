@@ -20,6 +20,13 @@ void Sleeper::init(SleeperCallback beforeSleep, SleeperCallback afterWake, gpio_
     this->pinCount = pinCount;
 };
 
+static void sleeperTask(void *arg)
+{
+    auto sleeper = static_cast<Sleeper *>(arg);
+    sleeper->goToSleep();
+    vTaskDelete(NULL);
+}
+
 void Sleeper::recordInteraction() { lastInteractionSeconds = MICRO_TO_SEC(esp_timer_get_time()); };
 void Sleeper::start()
 {
@@ -56,6 +63,11 @@ static void iterate(gpio_num_t *pins, uint8_t pinCount, function<void(gpio_num_t
         callback(*i);
         i++;
     }
+};
+
+void Sleeper::manuallySleep()
+{
+    xTaskCreate(sleeperTask, "sleeperTask", 3 * 1024, this, configMAX_PRIORITIES - 2, taskHandle);
 };
 
 void Sleeper::goToSleep()

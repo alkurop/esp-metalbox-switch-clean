@@ -12,43 +12,77 @@
 
 #include "tag.hpp"
 #include "esp_hid_gap.h"
+#include "timer.hpp"
+
+using namespace TMR;
+#define SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS 3
 
 namespace ble
 {
-    using ConnectionListener = std::function<void(bool)>;
+    using EventListener = std::function<void(bool)>;
 
     class BleModule
     {
     private:
-        ConnectionListener connectionListener;
+        EventListener connectionListener;
+        EventListener suspendListener;
         esp_hidd_dev_t *device_handle;
         uint8_t protocol_mode;
-        uint8_t *buffer;
+        uint8_t buffer[10];
         bool is_suspended;
         bool is_started;
         bool is_authenticated;
         void onConnected(bool isConnected);
         void onSuspended(bool isSuspended);
         void onStarted(bool isStarted);
-        
-        
+        esp_err_t sendReset();
+        uint8_t encodeButtonState(uint8_t currentState, uint8_t button, bool flag);
+        Timer resetTimer;
+        TimeoutListener resetTimeoutListener;
+        void onResetTimeout(Timer *timer);
+
     public:
         BleModule();
         ~BleModule();
-        void init(ConnectionListener listener);
+        void init(EventListener listener, EventListener suspendListener);
         void start(uint8_t battery_level);
         void stop();
         void onAuthenticated(bool isAuthenticated);
-        bool isStarted(){ return is_started; };
-        bool isSuspended(){ return is_suspended; };
-        bool isAuthenticated(){ return is_authenticated; };
+        bool isStarted() { return is_started; };
+        bool isSuspended() { return is_suspended; };
+        bool isAuthenticated() { return is_authenticated; };
         bool isConnected();
         esp_err_t sendBatteryCharge(uint8_t charge);
         esp_err_t sendButtonPress(uint8_t button, bool isPressed);
         void hidEventCallback(void *handler_args, esp_event_base_t base, int32_t id, void *event_data);
     };
 
-    constexpr unsigned char mediaReportMap[] = {
+    static char *con(const char *first, const char *second)
+    {
+        int l1 = 0, l2 = 0;
+        const char *f = first, *l = second;
+
+        // find lengths (you can also use strlen)
+        while (*f++)
+            ++l1;
+        while (*l++)
+            ++l2;
+
+        // allocate a buffer including terminating null char
+        char *result = new char[l1 + l2 + 1];
+
+        // then concatenate
+        for (int i = 0; i < l1; i++)
+            result[i] = first[i];
+        for (int i = l1; i < l1 + l2; i++)
+            result[i] = second[i - l1];
+
+        // finally, "cap" result with terminating null char
+        result[l1 + l2] = '\0';
+        return result;
+    }
+    
+  constexpr unsigned char mediaReportMap[] = {
         0x05, 0x01,					  // Usage Page (Generic Desktop Ctrls)
         0x09, 0x05,					  // Usage (Game Pad)
         0xA1, 0x01,					  // Collection (Application)
@@ -138,24 +172,22 @@ namespace ble
         0x27, 0xFF, 0xFF, 0x00, 0x00, //   Logical Maximum (65534)
         0x91, 0x02,					  //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
         0xC0,		
-    };
+    }; 
 
-
-    static  esp_hid_raw_report_map_t ble_report_maps[] = { 
-        {.data = mediaReportMap, .len = sizeof(mediaReportMap) }
-    };
+    static esp_hid_raw_report_map_t ble_report_maps[] = {
+        {.data = mediaReportMap, .len = sizeof(mediaReportMap)}};
 
     static esp_hid_device_config_t ble_hid_config = {
-            .vendor_id = 0x18d1,
-            .product_id = 0x9400,
-            .version = 0x100,
-            .device_name = "Metalbox 001",
-            .manufacturer_name = "Metalbox",
-            .serial_number = "001",
-            .report_maps = ble_report_maps,
-            .report_maps_len = 1,
-            .battery_level = 20
-    };
+        .vendor_id = 0x18d1,
+        .product_id = 0x9400,
+        .version = 0x100,
+        .device_name = con("Metalbox ", CONFIG_DEVICE_ID),
+        .manufacturer_name = "Metalbox",
+        .serial_number = CONFIG_DEVICE_ID,
+        .report_maps = ble_report_maps,
+        .report_maps_len = 1,
+        .battery_level = 20
+        };
     static BleModule *singletonBleModule;
-
+    
 }

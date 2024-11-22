@@ -3,9 +3,19 @@
 using namespace ble;
 using namespace BLE_TAG;
 
-BleModule::BleModule() { singletonBleModule = this; }
+BleModule::BleModule() : buffer{0}
+{
+    singletonBleModule = this;
+    this->resetTimeoutListener = [this](Timer *timer)
+    { this->onResetTimeout(timer); };
+}
 BleModule::~BleModule() { singletonBleModule = nullptr; }
-void BleModule::init(ConnectionListener listener) { this->connectionListener = listener; };
+void BleModule::init(EventListener connectionListener, EventListener suspendListener)
+{
+    this->connectionListener = connectionListener;
+    this->suspendListener = suspendListener;
+    this->resetTimer.init(this->resetTimeoutListener);
+};
 void BleModule::onConnected(bool isConnected)
 {
     connectionListener(isConnected);
@@ -13,7 +23,16 @@ void BleModule::onConnected(bool isConnected)
         esp_hid_ble_gap_adv_start();
 };
 
-void BleModule::onSuspended(bool isSuspended) { is_suspended = isSuspended; };
+void BleModule::onSuspended(bool isSuspended)
+{
+    this->is_suspended = isSuspended;
+    this->suspendListener(isSuspended);
+};
+
+void BleModule::onResetTimeout(Timer *timer)
+{
+    sendReset();
+}
 
 void BleModule::onStarted(bool isStarted)
 {
@@ -105,7 +124,12 @@ static void auth_callback(bool isAuthenticated) { singletonBleModule->onAuthenti
 
 void BleModule::onAuthenticated(bool isAuthenticated)
 {
-    is_authenticated = is_authenticated;
+    this->is_authenticated = isAuthenticated;
+    if (this->is_authenticated)
+    {
+        ESP_LOGI(TAG, "Start timer");
+        this->resetTimer.startOneShot(SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS);
+    }
     ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
 };
 
@@ -153,16 +177,138 @@ esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
     return res;
 };
 
-esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
+uint8_t BleModule::encodeButtonState(uint8_t currentState, uint8_t button, bool flag)
 {
-    uint8_t buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    if (isPressed)
+    // Check the current state of each button
+    bool leftPressed = (currentState == 1 || currentState == 3 || currentState == 2);
+    bool topPressed = (currentState == 1 || currentState == 7 || currentState == 0);
+    bool rightPressed = (currentState == 7 || currentState == 5 || currentState == 6);
+    bool bottomPressed = (currentState == 3 || currentState == 5 || currentState == 4);
+
+    // Update the state based on the input
+
+    // Update the state based on the input
+    if (flag)
     {
-        buffer[2] |= BIT(button);
+        switch (button)
+        {
+        case 0:
+            topPressed = true;
+            break;
+        case 1:
+            rightPressed = true;
+            break;
+        case 2:
+            bottomPressed = true;
+            break;
+        case 3:
+            leftPressed = true;
+            break;
+        }
+    }
+    else
+    {
+        switch (button)
+        {
+        case 0:
+            topPressed = false;
+            break;
+        case 1:
+            rightPressed = false;
+            break;
+        case 2:
+            bottomPressed = false;
+            break;
+        case 3:
+            leftPressed = false;
+            break;
+        }
     }
 
+    // Combine the states to produce the new bitmask
+    if (topPressed && leftPressed)
+        return 1; // Top Left
+    if (leftPressed && bottomPressed)
+        return 3; // Bottom Left
+    if (bottomPressed && rightPressed)
+        return 5; // Bottom Right
+    if (rightPressed && topPressed)
+        return 7; // Top Right
+    if (topPressed)
+        return 0; // Top
+    if (rightPressed)
+        return 6; // Right
+    if (bottomPressed)
+        return 4; // Bottom
+    if (leftPressed)
+        return 2; // Left
+
+    return 8; // Center (default)
+}
+
+esp_err_t BleModule::sendReset()
+{
+    buffer[1] = 0;
+    buffer[2] = 0;
+    buffer[3] = 127; // axis 0 left joystick left of right - to zero
+    buffer[4] = 127; // axis 1  left joystick up or down - to zero
+    buffer[5] = 127; // axis 2  right joystick left or right - to zero
+    buffer[6] = 127; // axis 3 right joystick up or down - to zero
+    buffer[7] = 0;   // axis 5 left rudder -  to min
+    buffer[8] = 0;   // axis 4  right rudder - to min
+    buffer[0] = 8;
+    /*
+     * 0 - 0000 top
+     * 1 - 0001 top right
+     * 2 - 0010 right
+     * 3 - 0011 bottom right
+     * 4 - 0100 bottom
+     * 5 - 0101 bottom left
+     * 6 - 0110 left
+     * 7 - 0111 top left
+     * 8 - 1000 center
+     */
     esp_err_t res = esp_hidd_dev_input_set(device_handle, 0, 0x03, buffer, sizeof(buffer));
-    ESP_LOGI(TAG, "Send button result %d", res);
-    ESP_LOGI(TAG, "Send button buffer %d", buffer[0]);
+    ESP_LOGI(TAG, "Send reset %d, buffer %d%d%d%d%d%d%d%d", res, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7]);
+    return res;
+}
+
+esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
+{
+
+    if (isPressed)
+    {
+        switch (button)
+        {
+        case 0:
+            buffer[2] |= BIT(6);
+            break;
+        case 1:
+            buffer[2] |= BIT(5);
+            break;
+        case 2:
+            buffer[2] |= BIT(4);
+            break;
+        }
+    }
+    else
+    {
+        switch (button)
+        {
+        case 0:
+            buffer[2] &= ~BIT(6);
+            // buffer[0] = encodeButtonState(buffer[0], 0, false); // top released
+            break;
+        case 1:
+            buffer[2] &= ~BIT(5);
+            // buffer[0] = encodeButtonState(buffer[0], 1, false); // right released
+            break;
+        case 2:
+            buffer[2] &= ~BIT(4);
+            break;
+        }
+    }
+    esp_err_t res = esp_hidd_dev_input_set(device_handle, 0, 0x03, buffer, sizeof(buffer));
+    ESP_LOGI(TAG, "Send button result %d, buffer %d%d%d%d%d%d%d%d", res, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7]);
     return res;
 };

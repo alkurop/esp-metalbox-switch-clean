@@ -25,7 +25,17 @@ Timer::~Timer()
 
 void Timer::startOneShot(uint32_t seconds)
 {
-    ESP_ERROR_CHECK(esp_timer_start_once(this->timerHandler, SEC_TO_MICRO(seconds)));
+    esp_timer_start_once(this->timerHandler, SEC_TO_MICRO(seconds));
+};
+
+void Timer::startOneShotMillis(uint32_t millis)
+{
+    esp_timer_start_once(this->timerHandler, MILLIS_TO_MICRO(millis));
+};
+
+void Timer::startPeriodicMillis(uint32_t millis)
+{
+    ESP_ERROR_CHECK(esp_timer_start_periodic(this->timerHandler, MILLIS_TO_MICRO(millis)));
 };
 
 void Timer::startPeriodic(uint32_t seconds)
@@ -39,5 +49,5 @@ void Timer::onTimeOut()
 
 void Timer::stop()
 {
-    ESP_ERROR_CHECK(esp_timer_stop(this->timerHandler));
+    esp_timer_stop(this->timerHandler);
 };
