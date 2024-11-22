@@ -249,7 +249,7 @@ uint8_t BleModule::encodeButtonState(uint8_t currentState, uint8_t button, bool 
 esp_err_t BleModule::sendReset()
 {
     buffer[1] = 0;
-    buffer[2] |= BIT(7);
+    buffer[2] = 0;
     buffer[3] = 127; // axis 0 left joystick left of right - to zero
     buffer[4] = 127; // axis 1  left joystick up or down - to zero
     buffer[5] = 127; // axis 2  right joystick left or right - to zero
