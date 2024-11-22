@@ -15,7 +15,7 @@
 #include "timer.hpp"
 
 using namespace TMR;
-#define SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS 2
+#define SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS 3
 
 namespace ble
 {
@@ -27,7 +27,7 @@ namespace ble
         ConnectionListener connectionListener;
         esp_hidd_dev_t *device_handle;
         uint8_t protocol_mode;
-        uint8_t buffer[16];
+        uint8_t buffer[10];
         bool is_suspended;
         bool is_started;
         bool is_authenticated;
@@ -35,9 +35,10 @@ namespace ble
         void onSuspended(bool isSuspended);
         void onStarted(bool isStarted);
         esp_err_t sendReset();
-        Timer timer;
-        TimeoutListener timeoutListener;
-        void onTimeout(Timer *timer);
+        uint8_t encodeButtonState(uint8_t currentState, uint8_t button, bool flag);
+        Timer resetTimer;
+        TimeoutListener resetTimeoutListener;
+        void onResetTimeout(Timer *timer);
 
     public:
         BleModule();
