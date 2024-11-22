@@ -296,12 +296,12 @@ esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
         switch (button)
         {
         case 0:
-            // buffer[2] &= ~BIT(6);
-            buffer[0] = encodeButtonState(buffer[0], 0, false); // top released
+            buffer[2] &= ~BIT(6);
+            // buffer[0] = encodeButtonState(buffer[0], 0, false); // top released
             break;
         case 1:
-            // buffer[2] &= ~BIT(5);
-            buffer[0] = encodeButtonState(buffer[0], 1, false); // right released
+            buffer[2] &= ~BIT(5);
+            // buffer[0] = encodeButtonState(buffer[0], 1, false); // right released
             break;
         case 2:
             buffer[2] &= ~BIT(4);
