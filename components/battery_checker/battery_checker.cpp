@@ -119,7 +119,7 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
-    int v = calibrated * 100 / 1535;
+    int v = calibrated * 100 / 1304;
 
     return (uint8_t)min(100, v);
 };

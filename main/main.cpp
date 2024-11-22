@@ -86,9 +86,9 @@ extern "C" void app_main(void)
     led1.init(L1_PIN);
     led1.set(true);
 
-    ESP_ERROR_CHECK(button3.init(B3_PIN, 3, buttonPressListener));
-    ESP_ERROR_CHECK(button1.init(B1_PIN, 1, buttonPressListener));
-    ESP_ERROR_CHECK(button2.init(B2_PIN, 2, buttonPressListener));
+    ESP_ERROR_CHECK(button3.init(B3_PIN, 2, buttonPressListener));
+    ESP_ERROR_CHECK(button1.init(B1_PIN, 0, buttonPressListener));
+    ESP_ERROR_CHECK(button2.init(B2_PIN, 1, buttonPressListener));
 
     sleeper1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     sleeper1.start();

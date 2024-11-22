@@ -3,9 +3,12 @@
 using namespace ble;
 using namespace BLE_TAG;
 
-BleModule::BleModule() { singletonBleModule = this; }
+BleModule::BleModule() : buffer{0} { singletonBleModule = this; }
 BleModule::~BleModule() { singletonBleModule = nullptr; }
-void BleModule::init(ConnectionListener listener) { this->connectionListener = listener; };
+void BleModule::init(ConnectionListener listener)
+{
+    this->connectionListener = listener;
+};
 void BleModule::onConnected(bool isConnected)
 {
     connectionListener(isConnected);
@@ -155,14 +158,35 @@ esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
 
 esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
 {
-    uint8_t buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    uint8_t index = 2;
+    uint8_t bit = 6;
+
+    if (button == 0)
+    {
+        index = 2;
+        bit = 6;
+    }
+    if (button == 1)
+    {
+        index = 2;
+        bit = 5;
+    }
+    if (button == 2)
+    {
+        index = 2;
+        bit = 4;
+    }
     if (isPressed)
     {
-        buffer[2] |= BIT(button);
+        buffer[index] |= BIT(bit);
+    }
+    else
+    {
+        buffer[index] &= ~BIT(bit);
     }
 
     esp_err_t res = esp_hidd_dev_input_set(device_handle, 0, 0x03, buffer, sizeof(buffer));
-    ESP_LOGI(TAG, "Send button result %d", res);
-    ESP_LOGI(TAG, "Send button buffer %d", buffer[0]);
+    ESP_LOGI(TAG, "Send button result %d, buffer %d%d%d%d%d%d%d%d", res, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7]);
     return res;
 };

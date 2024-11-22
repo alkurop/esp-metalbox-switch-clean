@@ -13,6 +13,7 @@
 #include "tag.hpp"
 #include "esp_hid_gap.h"
 
+
 namespace ble
 {
     using ConnectionListener = std::function<void(bool)>;
@@ -23,7 +24,7 @@ namespace ble
         ConnectionListener connectionListener;
         esp_hidd_dev_t *device_handle;
         uint8_t protocol_mode;
-        uint8_t *buffer;
+        uint8_t buffer[10];
         bool is_suspended;
         bool is_started;
         bool is_authenticated;
@@ -179,5 +180,5 @@ namespace ble
         .battery_level = 20
         };
     static BleModule *singletonBleModule;
-
+    
 }
