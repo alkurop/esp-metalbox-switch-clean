@@ -3,11 +3,17 @@
 using namespace ble;
 using namespace BLE_TAG;
 
-BleModule::BleModule() : buffer{0} { singletonBleModule = this; }
+BleModule::BleModule() : buffer{0}
+{
+    singletonBleModule = this;
+    this->timeoutListener = [this](Timer *timer)
+    { this->onTimeout(timer); };
+}
 BleModule::~BleModule() { singletonBleModule = nullptr; }
 void BleModule::init(ConnectionListener listener)
 {
     this->connectionListener = listener;
+    this->timer.init(this->timeoutListener);
 };
 void BleModule::onConnected(bool isConnected)
 {
@@ -16,7 +22,13 @@ void BleModule::onConnected(bool isConnected)
         esp_hid_ble_gap_adv_start();
 };
 
-void BleModule::onSuspended(bool isSuspended) { is_suspended = isSuspended; };
+void BleModule::onSuspended(bool isSuspended) { this->is_suspended = isSuspended; };
+
+void BleModule::onTimeout(Timer *timer)
+{
+
+    sendReset();
+}
 
 void BleModule::onStarted(bool isStarted)
 {
@@ -108,7 +120,12 @@ static void auth_callback(bool isAuthenticated) { singletonBleModule->onAuthenti
 
 void BleModule::onAuthenticated(bool isAuthenticated)
 {
-    is_authenticated = is_authenticated;
+    this->is_authenticated = isAuthenticated;
+    if (this->is_authenticated)
+    {
+        ESP_LOGI(TAG, "Start timer");
+        this->timer.startOneShot(2);
+    }
     ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
 };
 
@@ -155,6 +172,32 @@ esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
     }
     return res;
 };
+
+esp_err_t BleModule::sendReset()
+{
+    buffer[1] = 0;
+    buffer[2] |= BIT(7);;
+    buffer[3] = 127; // axis 0 left joystick left of right - to zero
+    buffer[4] = 127; // axis 1  left joystick up or down - to zero
+    buffer[5] = 127; // axis 2  right joystick left or right - to zero
+    buffer[6] = 127; // axis 3 right joystick up or down - to zero
+    buffer[7] = 0;   // axis 5 left rudder -  to min
+    buffer[8] = 0;   // axis 4  right rudder - to min
+    // buffer[0] = 255; // axis 7  cursor left or right - to zero
+                     // axis 6?  cursor left or right - to zero
+    // buffer[9] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[10] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[11] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[12] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[13] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[14] = 255; // axis 6?  cursor left or right - to zero
+    // buffer[15] = 255; // axis 6?  cursor left or right - to zero
+    buffer[0] = 243; // axis 6?  cursor left or right - to zero
+
+    esp_err_t res = esp_hidd_dev_input_set(device_handle, 0, 0x03, buffer, sizeof(buffer));
+    ESP_LOGI(TAG, "Send reset %d, buffer %d%d%d%d%d%d%d%d", res, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7]);
+    return res;
+}
 
 esp_err_t BleModule::sendButtonPress(uint8_t button, bool isPressed)
 {

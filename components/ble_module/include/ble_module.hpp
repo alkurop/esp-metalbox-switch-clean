@@ -12,7 +12,9 @@
 
 #include "tag.hpp"
 #include "esp_hid_gap.h"
+#include "timer.hpp"
 
+using namespace TMR;
 
 namespace ble
 {
@@ -24,13 +26,17 @@ namespace ble
         ConnectionListener connectionListener;
         esp_hidd_dev_t *device_handle;
         uint8_t protocol_mode;
-        uint8_t buffer[10];
+        uint8_t buffer[16];
         bool is_suspended;
         bool is_started;
         bool is_authenticated;
         void onConnected(bool isConnected);
         void onSuspended(bool isSuspended);
         void onStarted(bool isStarted);
+        esp_err_t sendReset();
+        Timer timer;
+        TimeoutListener timeoutListener;
+        void onTimeout(Timer *timer);
 
     public:
         BleModule();
