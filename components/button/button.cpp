@@ -60,7 +60,9 @@ void Button::ping()
     if (!isSameValue)
     {
         TickType_t now = xTaskGetTickCount();
-        bool debounceOver = now > this->next + BUTTON_DEBOUNCE_MILLIS / portTICK_PERIOD_MS;
+        // for button down debounce is bigger then button up
+        uint8_t k = this->state ? 1 : 2;
+        bool debounceOver = now > this->next + (BUTTON_DEBOUNCE_MILLIS * k) / portTICK_PERIOD_MS;
         if (debounceOver)
         {
             this->next = now;
