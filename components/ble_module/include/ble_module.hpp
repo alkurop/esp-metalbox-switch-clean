@@ -15,6 +15,7 @@
 #include "timer.hpp"
 
 using namespace TMR;
+#define SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS 2
 
 namespace ble
 {

@@ -124,7 +124,7 @@ void BleModule::onAuthenticated(bool isAuthenticated)
     if (this->is_authenticated)
     {
         ESP_LOGI(TAG, "Start timer");
-        this->timer.startOneShot(2);
+        this->timer.startOneShot(SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS);
     }
     ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
 };
@@ -176,7 +176,7 @@ esp_err_t BleModule::sendBatteryCharge(uint8_t charge)
 esp_err_t BleModule::sendReset()
 {
     buffer[1] = 0;
-    buffer[2] |= BIT(7);;
+    buffer[2] |= BIT(7);
     buffer[3] = 127; // axis 0 left joystick left of right - to zero
     buffer[4] = 127; // axis 1  left joystick up or down - to zero
     buffer[5] = 127; // axis 2  right joystick left or right - to zero
@@ -184,7 +184,7 @@ esp_err_t BleModule::sendReset()
     buffer[7] = 0;   // axis 5 left rudder -  to min
     buffer[8] = 0;   // axis 4  right rudder - to min
     // buffer[0] = 255; // axis 7  cursor left or right - to zero
-                     // axis 6?  cursor left or right - to zero
+    // axis 6?  cursor left or right - to zero
     // buffer[9] = 255; // axis 6?  cursor left or right - to zero
     // buffer[10] = 255; // axis 6?  cursor left or right - to zero
     // buffer[11] = 255; // axis 6?  cursor left or right - to zero
