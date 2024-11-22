@@ -19,12 +19,13 @@ using namespace TMR;
 
 namespace ble
 {
-    using ConnectionListener = std::function<void(bool)>;
+    using EventListener = std::function<void(bool)>;
 
     class BleModule
     {
     private:
-        ConnectionListener connectionListener;
+        EventListener connectionListener;
+        EventListener suspendListener;
         esp_hidd_dev_t *device_handle;
         uint8_t protocol_mode;
         uint8_t buffer[10];
@@ -43,7 +44,7 @@ namespace ble
     public:
         BleModule();
         ~BleModule();
-        void init(ConnectionListener listener);
+        void init(EventListener listener, EventListener suspendListener);
         void start(uint8_t battery_level);
         void stop();
         void onAuthenticated(bool isAuthenticated);

@@ -10,9 +10,10 @@ BleModule::BleModule() : buffer{0}
     { this->onResetTimeout(timer); };
 }
 BleModule::~BleModule() { singletonBleModule = nullptr; }
-void BleModule::init(ConnectionListener listener)
+void BleModule::init(EventListener connectionListener, EventListener suspendListener)
 {
-    this->connectionListener = listener;
+    this->connectionListener = connectionListener;
+    this->suspendListener = suspendListener;
     this->resetTimer.init(this->resetTimeoutListener);
 };
 void BleModule::onConnected(bool isConnected)
@@ -22,7 +23,11 @@ void BleModule::onConnected(bool isConnected)
         esp_hid_ble_gap_adv_start();
 };
 
-void BleModule::onSuspended(bool isSuspended) { this->is_suspended = isSuspended; };
+void BleModule::onSuspended(bool isSuspended)
+{
+    this->is_suspended = isSuspended;
+    this->suspendListener(isSuspended);
+};
 
 void BleModule::onResetTimeout(Timer *timer)
 {
@@ -124,7 +129,6 @@ void BleModule::onAuthenticated(bool isAuthenticated)
     {
         ESP_LOGI(TAG, "Start timer");
         this->resetTimer.startOneShot(SEND_RESET_AFTER_AUTH_TIMEOUT_SECONDS);
-        // this->resetTimer.startPeriodicMillis(2000);
     }
     ESP_LOGI(TAG, "Is Authenticated %d", isAuthenticated);
 };

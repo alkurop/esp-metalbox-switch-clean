@@ -27,6 +27,8 @@ namespace sleeper
         TimeoutListener timeoutListener;
         void onTimeout(Timer *);
 
+        TaskHandle_t *taskHandle;
+
         // params
         gpio_num_t *wakeUpPins;
         uint8_t pinCount;
@@ -36,8 +38,6 @@ namespace sleeper
         // state
         int16_t lastInteractionSeconds;
 
-        void goToSleep();
-
     public:
         Sleeper(uint32_t timeoutSeconds);
         void init(
@@ -46,6 +46,8 @@ namespace sleeper
             gpio_num_t *wakeUpPins,
             uint8_t pinCount);
 
+        void goToSleep();
+        void manuallySleep();
         void start();
         void recordInteraction();
     };

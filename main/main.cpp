@@ -65,6 +65,7 @@ auto buttonPressListener = [](uint8_t number, bool state)
 
 auto beforeSleep = []()
 {
+    led1.set(false);
     button1.uninstall();
     button2.uninstall();
     button3.uninstall();
@@ -94,6 +95,12 @@ auto onBlinkTimer = [](Timer *timer)
     led1.set(blink);
 };
 
+auto suspendListener = [](bool suspended)
+{
+    if (suspended)
+        sleeper1.manuallySleep();
+};
+
 auto connectionListener = [](bool connected)
 {
     ESP_LOGI(TAG, "Ble Connected %d", connected);
@@ -107,8 +114,8 @@ extern "C" void app_main(void)
 {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
 
-    blinkTimer.init(onBlinkTimer);
     led1.init(L1_PIN);
+    blinkTimer.init(onBlinkTimer);
     startBlinkTimer();
 
     ESP_ERROR_CHECK(button3.init(B3_PIN, 2, buttonPressListener));
@@ -124,7 +131,7 @@ extern "C" void app_main(void)
     }
     batteryChecker.start();
 
-    ble1.init(connectionListener);
+    ble1.init(connectionListener, suspendListener);
     ble1.start(batteryChecker.getBatteryLevel());
 
     ESP_LOGI(TAG, ">>>>>>> ACTIVE");
