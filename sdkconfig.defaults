@@ -28,7 +28,7 @@ CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP=y
 # These two settings mean that no logs are printed
 # during startup, but it's possible to use esp_log_level_set("*", ESP_LOG_INFO)
 # at runtime to get Info-level logging back
-CONFIG_LOG_DEFAULT_LEVEL_NONE=y
+CONFIG_LOG_DEFAULT_LEVEL_DEBUG=y
 CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
 CONFIG_DEVICE_ID="011"
 

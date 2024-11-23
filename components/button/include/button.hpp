@@ -10,7 +10,8 @@
 
 #include "tag.hpp"
 
-#define BUTTON_DEBOUNCE_MILLIS 30
+#define BUTTON_DEBOUNCE_MILLIS_ON 40
+#define BUTTON_DEBOUNCE_MILLIS_OFF 60
 
 namespace ButtonHandler
 {

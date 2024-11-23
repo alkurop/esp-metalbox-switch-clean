@@ -19,6 +19,8 @@
 #define BCH_ADC_UNIT ADC_UNIT_1
 #define BCH_TAKES_NUM 5
 #define BCH_TAKES_DELAY_MILLIS 50
+#define CALIBRATED_MIN 1000
+#define CALIBRATED_MAX 1305
 
 using namespace TMR;
 
@@ -27,7 +29,7 @@ using namespace TMR;
  - add 100 nf capacitor to input
  - check if it works after putting to sleep
  - calibrate the voltage metering min max (now for 3,3 volt it shows 1625)
- 
+
 */
 namespace bchk
 {
@@ -52,6 +54,7 @@ namespace bchk
         esp_err_t initAdc();
         esp_err_t deinitAdc();
         esp_err_t adc_calibration_init();
+        int calculatePercentage(int input);
 
     public:
         BatteryListener batteryListener;

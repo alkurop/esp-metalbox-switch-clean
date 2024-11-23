@@ -119,10 +119,23 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
-    int v = calibrated * 100 / 1304;
-
-    return (uint8_t)min(100, v);
+    return calculatePercentage(calibrated);
 };
+
+int BatteryChecker::calculatePercentage(int input)
+{
+    if (input > CALIBRATED_MAX)
+    {
+        ESP_LOGW(TAG, "Input exceeds maximum. Using max value for calculation");
+        input = CALIBRATED_MAX; // Cap the input to MAX
+    }
+    else if (input < CALIBRATED_MIN)
+    {
+        ESP_LOGW(TAG, "Input is below minimum. Using min value for calculation");
+        input = CALIBRATED_MIN; // Cap the input to MIN
+    }
+    return ((input - CALIBRATED_MIN) * 100) / (CALIBRATED_MAX - CALIBRATED_MIN); // Calculate and return integer percentage
+}
 
 esp_err_t BatteryChecker::adc_calibration_init()
 {
