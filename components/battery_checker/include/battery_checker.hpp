@@ -19,7 +19,8 @@
 #define BCH_ADC_UNIT ADC_UNIT_1
 #define BCH_TAKES_NUM 5
 #define BCH_TAKES_DELAY_MILLIS 50
-#define CALIBRATED_MIN 1000
+#define CALIBRATED_MIN 860
+#define CALIBRATED_OFF_MIN 850
 #define CALIBRATED_MAX 1305
 
 using namespace TMR;
@@ -33,7 +34,8 @@ using namespace TMR;
 */
 namespace bchk
 {
-    using BatteryListener = std::function<void(uint8_t)>;
+    using BatteryLevelListener = std::function<void(uint8_t)>;
+    using BatteryTooLowListener = std::function<void(void)>;
 
     class BatteryChecker
 
@@ -57,10 +59,11 @@ namespace bchk
         int calculatePercentage(int input);
 
     public:
-        BatteryListener batteryListener;
+        BatteryLevelListener batteryListener;
+        BatteryTooLowListener tooLowListener;
 
         BatteryChecker(gpio_num_t enablePin, gpio_num_t checkPin, uint16_t timeoutSeconds);
-        esp_err_t init(BatteryListener listener);
+        esp_err_t init(BatteryLevelListener levelListener, BatteryTooLowListener tooLowListener);
         esp_err_t deinit();
         void start();
         void stop();

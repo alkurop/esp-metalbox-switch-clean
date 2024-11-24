@@ -47,10 +47,8 @@ cd "$(dirname "$0")" || exit
 
 cd ../
 
-sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"$id\"/" sdkconfig
-sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"$id\"/" sdkconfig.defaults
+sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"Switch $id\"/" sdkconfig
 sed -i '' "s/CONFIG_LOG_DEFAULT_LEVEL_.*/CONFIG_LOG_DEFAULT_LEVEL_$log=y/" sdkconfig
-sed -i '' "s/CONFIG_LOG_DEFAULT_LEVEL_.*/CONFIG_LOG_DEFAULT_LEVEL_$log=y/" sdkconfig.defaults
 
 # rm -rf build
 mkdir -p build

@@ -55,6 +55,10 @@ void stopBlinkTimer()
     blinkTimer.stop();
 };
 
+auto onBatteryTooLow = []() {
+    // gotta update board to turn off when low bat
+};
+
 auto buttonPressListener = [](uint8_t number, bool state)
 {
     ESP_LOGI(TAG, "Button value %d", number);
@@ -124,7 +128,7 @@ extern "C" void app_main(void)
 
     sleeper1.init(beforeSleep, afterWake, wakeUpPins, PIN_SIZE);
     sleeper1.start();
-    auto result = batteryChecker.init(onBatteryChecker);
+    auto result = batteryChecker.init(onBatteryChecker, onBatteryTooLow);
     if (result != ESP_OK)
     {
         ESP_LOGE(TAG, "Battery checker init failed with status %d", result);

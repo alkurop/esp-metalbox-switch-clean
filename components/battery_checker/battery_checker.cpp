@@ -26,9 +26,10 @@ BatteryChecker::BatteryChecker(gpio_num_t enablePin, gpio_num_t checkPin, uint16
     this->adc_handle = NULL;
 };
 
-esp_err_t BatteryChecker::init(BatteryListener listener)
+esp_err_t BatteryChecker::init(BatteryLevelListener levelListener, BatteryTooLowListener tooLowListener)
 {
-    this->batteryListener = listener;
+    this->batteryListener = levelListener;
+    this->tooLowListener = tooLowListener;
     this->timer.init(this->timeoutListener);
 
     gpio_config_t senderConfig{(1ULL << enablePin),
@@ -119,6 +120,10 @@ uint8_t BatteryChecker::checkBatteryLevel()
 
     ESP_LOGI(TAG, "RAW %d", raw);
     ESP_LOGI(TAG, "CALIBRATED %d", calibrated);
+    if (calibrated <= CALIBRATED_OFF_MIN)
+    {
+        this->tooLowListener();
+    }
     return calculatePercentage(calibrated);
 };
 
@@ -132,9 +137,9 @@ int BatteryChecker::calculatePercentage(int input)
     else if (input < CALIBRATED_MIN)
     {
         ESP_LOGW(TAG, "Input is below minimum. Using min value for calculation");
-        input = CALIBRATED_MIN; // Cap the input to MIN
+        input = CALIBRATED_MIN + 1; // Cap the input to MIN
     }
-    return ((input - CALIBRATED_MIN) * 100) / (CALIBRATED_MAX - CALIBRATED_MIN); // Calculate and return integer percentage
+    return max(1, ((input - CALIBRATED_MIN) * 100) / (CALIBRATED_MAX - CALIBRATED_MIN)); // Calculate and return integer percentage
 }
 
 esp_err_t BatteryChecker::adc_calibration_init()
