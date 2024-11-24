@@ -137,7 +137,7 @@ int BatteryChecker::calculatePercentage(int input)
     else if (input < CALIBRATED_MIN)
     {
         ESP_LOGW(TAG, "Input is below minimum. Using min value for calculation");
-        input = CALIBRATED_MIN + 1; // Cap the input to MIN
+        input = CALIBRATED_MIN; // Cap the input to MIN
     }
     return max(1, ((input - CALIBRATED_MIN) * 100) / (CALIBRATED_MAX - CALIBRATED_MIN)); // Calculate and return integer percentage
 }
