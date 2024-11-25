@@ -13,6 +13,7 @@
 #include "ble_module.hpp"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+#include "send_off_signal.hpp"
 
 using namespace App;
 using namespace ble;
@@ -25,6 +26,7 @@ using namespace TMR;
 #define B2_PIN GPIO_NUM_4
 #define B3_PIN GPIO_NUM_5
 #define L1_PIN GPIO_NUM_1
+#define OFF_PIN GPIO_NUM_10
 #define SEND_OFF_PIN GPIO_NUM_6
 #define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_7
 #define BATTERY_CHECK_PIN GPIO_NUM_0
@@ -44,6 +46,7 @@ static Sleeper sleeper1(SLEEPER_TIMEOUT_SECONDS);
 static BatteryChecker batteryChecker(BATTERY_CHECK_ENABLE_PIN, BATTERY_CHECK_PIN, BATTERY_CHECKER_TIMEOUT_SECONDS);
 static BleModule ble1;
 static Timer blinkTimer;
+static SendOffSignal sendOffSignal(SEND_OFF_PIN);
 
 void startBlinkTimer()
 {
@@ -59,6 +62,8 @@ void stopBlinkTimer()
 auto onBatteryTooLow = []()
 {
     // gotta update board to turn off when low bat
+auto onBatteryTooLow = []() {
+    sendOffSignal.sendOff();
 };
 
 auto buttonPressListener = [](uint8_t number, bool state)
@@ -117,7 +122,7 @@ auto connectionListener = [](bool connected)
 };
 
 void generate_mac_address(esp_bd_addr_t rand_addr) {
-   
+
     // Get the device ID string from sdkconfig
     const char *device_id = CONFIG_DEVICE_ID;
     int len = strlen(device_id);
@@ -138,10 +143,11 @@ extern "C" void app_main(void)
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "Setting mac address failed: %d", err);
-    } 
+    }
 
 
     led1.init(L1_PIN);
+    sendOffSignal.init();
     blinkTimer.init(onBlinkTimer);
     startBlinkTimer();
 
