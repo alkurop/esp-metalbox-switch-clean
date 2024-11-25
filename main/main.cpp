@@ -13,6 +13,7 @@
 #include "ble_module.hpp"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+#include "send_off_signal.hpp"
 
 using namespace App;
 using namespace ble;
@@ -44,6 +45,7 @@ static Sleeper sleeper1(SLEEPER_TIMEOUT_SECONDS);
 static BatteryChecker batteryChecker(BATTERY_CHECK_ENABLE_PIN, BATTERY_CHECK_PIN, BATTERY_CHECKER_TIMEOUT_SECONDS);
 static BleModule ble1;
 static Timer blinkTimer;
+static SendOffSignal sendOffSignal(SEND_OFF_PIN);
 
 void startBlinkTimer()
 {
@@ -56,9 +58,9 @@ void stopBlinkTimer()
     blinkTimer.stop();
 };
 
-auto onBatteryTooLow = []()
-{
-    // gotta update board to turn off when low bat
+auto onBatteryTooLow = []() {
+    // board 3.2 does not support this 
+    sendOffSignal.sendOff();
     // not available on board v3.2
 };
 
@@ -143,6 +145,7 @@ extern "C" void app_main(void)
 
 
     led1.init(L1_PIN);
+    sendOffSignal.init();
     blinkTimer.init(onBlinkTimer);
     startBlinkTimer();
 
