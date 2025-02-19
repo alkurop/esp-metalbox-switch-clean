@@ -3,6 +3,7 @@
  */
 #include <esp_log.h>
 #include <esp_bit_defs.h>
+#include "esp_mac.h"
 
 #include "tag.hpp"
 #include "button.hpp"
@@ -55,7 +56,8 @@ void stopBlinkTimer()
     blinkTimer.stop();
 };
 
-auto onBatteryTooLow = []() {
+auto onBatteryTooLow = []()
+{
     // gotta update board to turn off when low bat
 };
 
@@ -114,9 +116,30 @@ auto connectionListener = [](bool connected)
         startBlinkTimer();
 };
 
+void generate_mac_address(esp_bd_addr_t rand_addr) {
+   
+    // Get the device ID string from sdkconfig
+    const char *device_id = CONFIG_DEVICE_ID;
+    int len = strlen(device_id);
+    rand_addr[3] = (len >= 3) ? device_id[len - 3] : 0x00;
+    rand_addr[4] = (len >= 2) ? device_id[len - 2] : 0x00;
+    rand_addr[5] = (len >= 1) ? device_id[len - 1] : 0x00;
+    ESP_LOGI(TAG, "Generated MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
+        rand_addr[0], rand_addr[1], rand_addr[2],
+        rand_addr[3], rand_addr[4], rand_addr[5]);
+}
+
 extern "C" void app_main(void)
 {
-    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
+    esp_bd_addr_t rand_addr = {0xD9, 0x31, 0x06, 0xa3, 0x35, 0xe2};
+    generate_mac_address(rand_addr);
+    auto err = esp_iface_mac_addr_set(rand_addr, ESP_MAC_BT);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Setting mac address failed: %d", err);
+    } 
+
 
     led1.init(L1_PIN);
     blinkTimer.init(onBlinkTimer);

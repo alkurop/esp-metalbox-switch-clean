@@ -96,7 +96,9 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "freertos.h": "c",
-        "esp_hid_common.h": "c"
+        "esp_hid_common.h": "c",
+        "esp_hid_gap.h": "c"
     },
+    "git.autoRepositoryDetection": "openEditors",
     "git.ignoreLimitWarning": true
 }

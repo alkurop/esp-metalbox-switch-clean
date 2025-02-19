@@ -18,7 +18,7 @@ help()
 
 id=ZERO
 path=./autput
-exec_path="$(cd -- "$MY_PATH" && pwd)"
+exec_path="$(cd "$(dirname "$0")" && pwd)"
 log=NONE 
 
 while getopts ":hn:o:l:" option; do
@@ -47,12 +47,15 @@ cd "$(dirname "$0")" || exit
 
 cd ../
 
-sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"Switch $id\"/" sdkconfig
+sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"$id\"/" sdkconfig
+sed -i '' "s/CONFIG_DEVICE_ID=.*/CONFIG_DEVICE_ID=\"$id\"/" sdkconfig.defaults
 sed -i '' "s/CONFIG_LOG_DEFAULT_LEVEL_.*/CONFIG_LOG_DEFAULT_LEVEL_$log=y/" sdkconfig
+sed -i '' "s/CONFIG_LOG_DEFAULT_LEVEL_.*/CONFIG_LOG_DEFAULT_LEVEL_$log=y/" sdkconfig.defaults
 
 # rm -rf build
 mkdir -p build
 cd build
+echo "$(pwd)"
 
 
 cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 -DIDF_TARGET=esp32c3   ..
