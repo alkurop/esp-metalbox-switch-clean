@@ -55,7 +55,8 @@ void stopBlinkTimer()
     blinkTimer.stop();
 };
 
-auto onBatteryTooLow = []() {
+auto onBatteryTooLow = []()
+{
     // gotta update board to turn off when low bat
 };
 
@@ -116,6 +117,7 @@ auto connectionListener = [](bool connected)
 
 extern "C" void app_main(void)
 {
+    
     led1.init(L1_PIN);
     blinkTimer.init(onBlinkTimer);
     startBlinkTimer();

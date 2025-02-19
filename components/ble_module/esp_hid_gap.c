@@ -5,6 +5,7 @@
  */
 
 #include "esp_hid_gap.h"
+#include "esp_mac.h"
 
 static const char *TAG = "ESP_HID_GAP";
 
@@ -204,9 +205,13 @@ esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
 
     esp_bd_addr_t rand_addr = {0xD9,0x31,0x01,0x01,0x01,0x01};
     generate_mac_address(rand_addr);
+    ret = esp_iface_mac_addr_set(rand_addr, ESP_MAC_BT);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Setting mac address failed: %d", ret);
+        return ret;
+    } 
 
-
-/*  */
     if ((ret = esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1)) != ESP_OK)
     {
         ESP_LOGE(TAG, "GAP set_security_param AUTHEN_REQ_MODE failed: %d", ret);
@@ -249,17 +254,12 @@ esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
         return ret;
     }
 
-    if ((ret = esp_ble_gap_set_rand_addr(rand_addr)) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "GAP setting address failed: %d", ret);
-        return ret;
-    }
-
     if ((ret = esp_ble_gap_config_adv_data(&ble_adv_data)) != ESP_OK)
     {
         ESP_LOGE(TAG, "GAP config_adv_data failed: %d", ret);
         return ret;
     }
+ 
     return ret;
 }
 
