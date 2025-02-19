@@ -4,4 +4,20 @@ config DEVICE_ID
         default "001"
         help
             Type device id of Metalbox
+config MANUFACTURE_NAME
+    string "manufacture_name"
+    default "Metalbox"
+    help
+        Name of the manufacture
+config DEVICE_NAME
+    string "device_name"
+    default ""
+    help
+        Name of the device model
+config DEVICE_MODEL_FLAG
+    hex "device_model_flag"
+    range 0x00 0xFF
+    default 0x01  # Set a default value (e.g., 0x42)
+    help
+        Name of the device model
 endmenu

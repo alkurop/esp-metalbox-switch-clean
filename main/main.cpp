@@ -116,8 +116,6 @@ auto connectionListener = [](bool connected)
 
 extern "C" void app_main(void)
 {
-    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-
     led1.init(L1_PIN);
     blinkTimer.init(onBlinkTimer);
     startBlinkTimer();
