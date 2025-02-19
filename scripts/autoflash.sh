@@ -20,7 +20,7 @@ help()
 
 id=ZERO
 path=./build/autput
-exec_path="$(cd -- "$MY_PATH" && pwd)"
+exec_path="$(cd "$(dirname "$0")" && pwd)"
 port=/dev/cu.usbmodem1114101
 baud=460800
 

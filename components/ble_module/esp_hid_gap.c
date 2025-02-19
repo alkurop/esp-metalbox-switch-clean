@@ -155,16 +155,17 @@ static esp_err_t init_ble_gap(void)
 }
 
 void generate_mac_address(esp_bd_addr_t rand_addr) {
-    rand_addr[0] = 0xE4;
-    rand_addr[1] = 0xB0;
+   
     rand_addr[2] = CONFIG_DEVICE_MODEL_FLAG;  // Use the config value
-
     // Get the device ID string from sdkconfig
     const char *device_id = CONFIG_DEVICE_ID;
     int len = strlen(device_id);
     rand_addr[3] = (len >= 3) ? device_id[len - 3] : 0x00;
     rand_addr[4] = (len >= 2) ? device_id[len - 2] : 0x00;
     rand_addr[5] = (len >= 1) ? device_id[len - 1] : 0x00;
+    ESP_LOGI(TAG, "Generated MAC Address: %02X:%02X:%02X:%02X:%02X:%02X",
+        rand_addr[0], rand_addr[1], rand_addr[2],
+        rand_addr[3], rand_addr[4], rand_addr[5]);
 }
 
 esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
@@ -176,7 +177,7 @@ esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
     };
 
     esp_ble_adv_data_t ble_adv_data = {
-        .set_scan_rsp = false,
+        .set_scan_rsp = true,
         .include_name = true,
         .include_txpower = true,
         .min_interval = 0x0006, // slave connection min interval, Time = min_interval * 1.25 msec
@@ -201,6 +202,11 @@ esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
     uint8_t key_size = 16;   // the key size should be 7~16 bytes
     uint32_t passkey = 1234; // ESP_IO_CAP_OUT
 
+    esp_bd_addr_t rand_addr = {0xD9,0x31,0x01,0x01,0x01,0x01};
+    generate_mac_address(rand_addr);
+
+
+/*  */
     if ((ret = esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1)) != ESP_OK)
     {
         ESP_LOGE(TAG, "GAP set_security_param AUTHEN_REQ_MODE failed: %d", ret);
@@ -243,21 +249,17 @@ esp_err_t esp_hid_ble_gap_adv_init(uint16_t appearance, const char *device_name)
         return ret;
     }
 
-    if ((ret = esp_ble_gap_config_adv_data(&ble_adv_data)) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "GAP config_adv_data failed: %d", ret);
-        return ret;
-    }
-
-    esp_bd_addr_t rand_addr;
-    generate_mac_address(rand_addr);
-
     if ((ret = esp_ble_gap_set_rand_addr(rand_addr)) != ESP_OK)
     {
         ESP_LOGE(TAG, "GAP setting address failed: %d", ret);
         return ret;
     }
 
+    if ((ret = esp_ble_gap_config_adv_data(&ble_adv_data)) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "GAP config_adv_data failed: %d", ret);
+        return ret;
+    }
     return ret;
 }
 

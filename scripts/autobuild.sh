@@ -18,7 +18,7 @@ help()
 
 id=ZERO
 path=./autput
-exec_path="$(cd -- "$MY_PATH" && pwd)"
+exec_path="$(cd "$(dirname "$0")" && pwd)"
 log=NONE 
 
 while getopts ":hn:o:l:" option; do
