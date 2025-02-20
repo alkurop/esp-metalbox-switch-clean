@@ -55,7 +55,6 @@ sed -i '' "s/CONFIG_LOG_DEFAULT_LEVEL_.*/CONFIG_LOG_DEFAULT_LEVEL_$log=y/" sdkco
 # rm -rf build
 mkdir -p build
 cd build
-echo "$(pwd)"
 
 
 cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 -DIDF_TARGET=esp32c3   ..

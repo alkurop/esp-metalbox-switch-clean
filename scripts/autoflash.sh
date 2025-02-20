@@ -41,7 +41,5 @@ while getopts ":hn:f:p:b:" option; do
    esac
 done
 
-echo $path
-
 esptool.py --chip esp32c3 --baud $baud --port $port --before default_reset --after hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 $path/bootloader.bin 0x8000 $path/partition-table.bin 0x10000 $path/$id.bin
 
