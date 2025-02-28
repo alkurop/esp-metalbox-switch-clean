@@ -26,7 +26,6 @@ using namespace TMR;
 #define B2_PIN GPIO_NUM_4
 #define B3_PIN GPIO_NUM_5
 #define L1_PIN GPIO_NUM_1
-#define OFF_PIN GPIO_NUM_10
 #define SEND_OFF_PIN GPIO_NUM_6
 #define BATTERY_CHECK_ENABLE_PIN GPIO_NUM_7
 #define BATTERY_CHECK_PIN GPIO_NUM_0
@@ -59,10 +58,8 @@ void stopBlinkTimer()
     blinkTimer.stop();
 };
 
-auto onBatteryTooLow = []()
-{
-    // gotta update board to turn off when low bat
 auto onBatteryTooLow = []() {
+    // board 3.2 does not support this 
     sendOffSignal.sendOff();
 };
 

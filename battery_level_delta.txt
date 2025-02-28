@@ -2,6 +2,6 @@ esp_hid_common.h
 186: +     uint8_t battery_level;
 
 ble_hidd.c
-1105: +     s_dev->bat_level = config->battery_level;
+957: +     s_dev->bat_level = config->battery_level;
   
- 1106:   s_dev->bat_ccc.value = 1;
+958:   s_dev->bat_ccc.value = 1;
