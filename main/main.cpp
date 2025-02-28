@@ -59,6 +59,7 @@ void stopBlinkTimer()
 auto onBatteryTooLow = []()
 {
     // gotta update board to turn off when low bat
+    // not available on board v3.2
 };
 
 auto buttonPressListener = [](uint8_t number, bool state)
